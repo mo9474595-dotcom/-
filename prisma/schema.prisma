@@ -1,0 +1,170 @@
+// Prisma schema for the online exam / anti-cheat system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  TERMINATED
+}
+
+enum CheatEventType {
+  TAB_HIDDEN
+  WINDOW_BLUR
+  FULLSCREEN_EXIT
+  COPY_ATTEMPT
+  PASTE_ATTEMPT
+  CONTEXT_MENU
+  DEVTOOLS_SUSPECTED
+  MULTIPLE_SESSION_BLOCKED
+  SHORTCUT_BLOCKED
+}
+
+model Teacher {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  exams Exam[]
+}
+
+model Exam {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  durationMinutes  Int
+  shuffleQuestions Boolean  @default(true)
+  shuffleChoices   Boolean  @default(true)
+  maxTabViolations Int      @default(3)
+  isPublished      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  codes     ExamCode[]
+  attempts  ExamAttempt[]
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  type          QuestionType @default(MULTIPLE_CHOICE)
+  text          String
+  points        Int          @default(1)
+  order         Int          @default(0)
+  correctAnswer String? // used for SHORT_ANSWER exact-match / TRUE_FALSE ("true"/"false")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  choices Choice[]
+  answers Answer[]
+}
+
+model Choice {
+  id        String  @id @default(cuid())
+  text      String
+  isCorrect Boolean @default(false)
+  order     Int     @default(0)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answers Answer[] @relation("SelectedChoice")
+}
+
+// A code the teacher generates and shares with a specific student (or a batch).
+// Joining an exam always requires a valid, unused-or-in-progress code.
+model ExamCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  studentName String?
+  studentRef  String? // e.g. student ID / seat number, set by teacher
+  createdAt   DateTime  @default(now())
+  usedAt      DateTime?
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  attempt ExamAttempt?
+}
+
+model ExamAttempt {
+  id             String        @id @default(cuid())
+  status         AttemptStatus @default(IN_PROGRESS)
+  studentName    String
+  studentRef     String?
+  startedAt      DateTime      @default(now())
+  deadlineAt     DateTime // server-computed: startedAt + exam.durationMinutes, authoritative for timing
+  submittedAt    DateTime?
+  score          Float?
+  maxScore       Float?
+  tabViolations  Int           @default(0)
+  sessionToken   String        @unique // bound to the browser session that started the attempt
+  ipAddress      String?
+  questionOrder  String // JSON array of question IDs in the (shuffled) order shown to this student
+  choiceOrderMap String // JSON map of questionId -> shuffled choice ID order
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  examCodeId String   @unique
+  examCode   ExamCode @relation(fields: [examCodeId], references: [id], onDelete: Cascade)
+
+  answers   Answer[]
+  cheatLogs CheatLog[]
+
+  @@index([examId])
+}
+
+model Answer {
+  id            String   @id @default(cuid())
+  textAnswer    String?
+  isCorrect     Boolean?
+  pointsAwarded Float?
+  updatedAt     DateTime @updatedAt
+
+  attemptId String
+  attempt   ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  selectedChoiceId String?
+  selectedChoice   Choice? @relation("SelectedChoice", fields: [selectedChoiceId], references: [id])
+
+  @@unique([attemptId, questionId])
+}
+
+model CheatLog {
+  id        String         @id @default(cuid())
+  type      CheatEventType
+  detail    String?
+  createdAt DateTime       @default(now())
+
+  attemptId String
+  attempt   ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+}

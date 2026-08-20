@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7fb;
+  --foreground: #101828;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-cairo);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Prevents text selection during locked-down exam sessions. */
+.exam-lockdown {
+  -webkit-user-select: none;
+  user-select: none;
+}
