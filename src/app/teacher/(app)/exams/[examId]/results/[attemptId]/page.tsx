@@ -26,7 +26,7 @@ export default async function AttemptDetailPage({
   const { examId, attemptId } = await params;
 
   const exam = await prisma.exam.findUnique({ where: { id: examId } });
-  if (!exam || exam.teacherId !== teacherId) notFound();
+  if (!exam || exam.teacherId !== teacherId || exam.deletedAt) notFound();
 
   const attempt = await prisma.examAttempt.findUnique({ where: { id: attemptId } });
   if (!attempt || attempt.examId !== examId) notFound();

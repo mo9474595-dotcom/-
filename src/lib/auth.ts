@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
 const TEACHER_COOKIE = "teacher_token";
 const TOKEN_TTL_SECONDS = 60 * 60 * 12; // 12 hours
@@ -26,8 +27,8 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-export async function createTeacherSession(teacherId: string) {
-  const token = await new SignJWT({ teacherId })
+export async function createTeacherSession(teacherId: string, sessionVersion: number) {
+  const token = await new SignJWT({ teacherId, sessionVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${TOKEN_TTL_SECONDS}s`)
@@ -55,7 +56,20 @@ export async function getTeacherIdFromSession(): Promise<string | null> {
 
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
-    return typeof payload.teacherId === "string" ? payload.teacherId : null;
+    const teacherId = payload.teacherId;
+    const sessionVersion = payload.sessionVersion;
+    if (typeof teacherId !== "string" || typeof sessionVersion !== "number") return null;
+
+    // A token signed before "logout everywhere" was bumped no longer
+    // matches the account's current session version, so it's rejected
+    // even though it hasn't hit its own expiry yet.
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: teacherId },
+      select: { sessionVersion: true },
+    });
+    if (!teacher || teacher.sessionVersion !== sessionVersion) return null;
+
+    return teacherId;
   } catch {
     return null;
   }

@@ -8,7 +8,7 @@ import { NotFoundError } from "@/lib/api-utils";
  */
 export async function getOwnedExam(teacherId: string, examId: string) {
   const exam = await prisma.exam.findUnique({ where: { id: examId } });
-  if (!exam || exam.teacherId !== teacherId) {
+  if (!exam || exam.teacherId !== teacherId || exam.deletedAt) {
     throw new NotFoundError("الامتحان غير موجود");
   }
   return exam;
@@ -18,7 +18,7 @@ export async function getOwnedClassSection(teacherId: string, classSectionId: st
   const classSection = await prisma.classSection.findUnique({
     where: { id: classSectionId },
   });
-  if (!classSection || classSection.teacherId !== teacherId) {
+  if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) {
     throw new NotFoundError("الشعبة غير موجودة");
   }
   return classSection;

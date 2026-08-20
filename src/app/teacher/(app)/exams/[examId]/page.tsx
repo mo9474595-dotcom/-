@@ -20,7 +20,7 @@ export default async function ExamDetailPage({
     },
   });
 
-  if (!exam || exam.teacherId !== teacherId) notFound();
+  if (!exam || exam.teacherId !== teacherId || exam.deletedAt) notFound();
 
   return (
     <div>

@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const teacherId = await requireTeacherId();
     const classes = await prisma.classSection.findMany({
-      where: { teacherId },
+      where: { teacherId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { students: true, projects: true, attendanceSessions: true } },
@@ -41,7 +41,11 @@ export async function POST(req: NextRequest) {
 
     if (!force) {
       const existing = await prisma.classSection.findFirst({
-        where: { teacherId, name: { equals: data.name, mode: "insensitive" } },
+        where: {
+          teacherId,
+          deletedAt: null,
+          name: { equals: data.name, mode: "insensitive" },
+        },
         select: { id: true },
       });
       if (existing) {

@@ -6,6 +6,7 @@ import { computeClassRanking } from "@/lib/ranking";
 import RosterManager from "./RosterManager";
 import WeightsEditor from "./WeightsEditor";
 import RankingTable from "./RankingTable";
+import DeleteClassButton from "./DeleteClassButton";
 
 export default async function ClassDetailPage({
   params,
@@ -22,14 +23,17 @@ export default async function ClassDetailPage({
       _count: { select: { projects: true, attendanceSessions: true } },
     },
   });
-  if (!classSection || classSection.teacherId !== teacherId) notFound();
+  if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) notFound();
 
   const ranking = await computeClassRanking(classId);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">{classSection.name}</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{classSection.name}</h1>
+          <DeleteClassButton classId={classId} />
+        </div>
         <div className="flex gap-2">
           <Link
             href={`/teacher/classes/${classId}/projects`}
@@ -43,6 +47,12 @@ export default async function ClassDetailPage({
           >
             الحضور ({classSection._count.attendanceSessions})
           </Link>
+          <a
+            href={`/api/teacher/classes/${classId}/export`}
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            تصدير الدرجات (CSV)
+          </a>
         </div>
       </div>
 

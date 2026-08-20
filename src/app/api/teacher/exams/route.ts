@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const teacherId = await requireTeacherId();
     const exams = await prisma.exam.findMany({
-      where: { teacherId },
+      where: { teacherId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { questions: true, attempts: true, codes: true } },

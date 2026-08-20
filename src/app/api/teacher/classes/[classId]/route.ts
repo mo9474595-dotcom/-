@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedClassSection } from "@/lib/exams";
+import { logAudit } from "@/lib/audit";
 import { classSectionSchema } from "@/lib/validation";
 
 type RouteParams = { params: Promise<{ classId: string }> };
@@ -58,9 +59,19 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
   try {
     const teacherId = await requireTeacherId();
     const { classId } = await params;
-    await getOwnedClassSection(teacherId, classId);
+    const classSection = await getOwnedClassSection(teacherId, classId);
 
-    await prisma.classSection.delete({ where: { id: classId } });
+    // Soft delete: hidden immediately, recoverable from the trash page.
+    await prisma.classSection.update({
+      where: { id: classId },
+      data: { deletedAt: new Date() },
+    });
+    await logAudit({
+      teacherId,
+      action: "CLASS_DELETED",
+      summary: `تم نقل الشعبة "${classSection.name}" إلى سلة المحذوفات`,
+      classSectionId: classId,
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     return handleApiError(err);

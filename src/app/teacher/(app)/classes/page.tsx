@@ -6,7 +6,7 @@ export default async function ClassesPage() {
   const teacherId = await requireTeacherId();
 
   const classes = await prisma.classSection.findMany({
-    where: { teacherId },
+    where: { teacherId, deletedAt: null },
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { students: true, projects: true, attendanceSessions: true } },

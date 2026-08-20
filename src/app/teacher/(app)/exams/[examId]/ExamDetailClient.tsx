@@ -24,10 +24,16 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  // Tracked separately from exam.questions (a server-refreshed prop) so the
+  // publish guard can't read a stale count: router.refresh() after adding a
+  // question is async, and a teacher who publishes right after adding
+  // their first question could otherwise hit this guard before that
+  // refresh has landed.
+  const [questionCount, setQuestionCount] = useState(exam.questions.length);
 
   async function togglePublish() {
     setPublishError(null);
-    if (!isPublished && exam.questions.length === 0) {
+    if (!isPublished && questionCount === 0) {
       setPublishError("أضف سؤالاً واحداً على الأقل قبل النشر");
       return;
     }
@@ -48,6 +54,26 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
     }
   }
 
+  async function handleDeleteExam() {
+    const ok = await confirm({
+      title: "حذف الامتحان",
+      body: "سيُنقل هذا الامتحان إلى سلة المحذوفات ولن يظهر في قائمتك، ويمكنك استعادته لاحقاً منها.",
+      confirmLabel: "حذف",
+      cancelLabel: "إلغاء",
+      danger: true,
+    });
+    if (!ok) return;
+
+    const res = await fetch(`/api/teacher/exams/${exam.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      toast("تعذر حذف الامتحان", "error");
+      return;
+    }
+    toast("تم نقل الامتحان إلى سلة المحذوفات", "success");
+    router.push("/teacher/dashboard");
+    router.refresh();
+  }
+
   async function handleAddQuestion(value: QuestionFormValue) {
     const res = await fetch(`/api/teacher/exams/${exam.id}/questions`, {
       method: "POST",
@@ -59,6 +85,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
       return data?.error ?? "تعذر إضافة السؤال";
     }
     setShowAddForm(false);
+    setQuestionCount((c) => c + 1);
     toast("تمت إضافة السؤال", "success");
     router.refresh();
   }
@@ -86,6 +113,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
     });
     if (!ok) return;
     await fetch(`/api/teacher/questions/${questionId}`, { method: "DELETE" });
+    setQuestionCount((c) => Math.max(0, c - 1));
     toast("تم حذف السؤال", "success");
     router.refresh();
   }
@@ -113,6 +141,12 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
               {isPublished ? "إلغاء النشر" : "نشر الامتحان"}
             </button>
             {publishError && <p className="text-xs text-red-600">{publishError}</p>}
+            <button
+              onClick={handleDeleteExam}
+              className="text-xs font-medium text-red-600 hover:underline"
+            >
+              حذف الامتحان
+            </button>
           </div>
         </div>
       </div>

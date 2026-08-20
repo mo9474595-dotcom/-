@@ -12,7 +12,7 @@ export default async function CodesPage({
   const { examId } = await params;
 
   const exam = await prisma.exam.findUnique({ where: { id: examId } });
-  if (!exam || exam.teacherId !== teacherId) notFound();
+  if (!exam || exam.teacherId !== teacherId || exam.deletedAt) notFound();
 
   const [codes, classes] = await Promise.all([
     prisma.examCode.findMany({
@@ -21,7 +21,7 @@ export default async function CodesPage({
       include: { attempt: { select: { status: true, score: true, maxScore: true } } },
     }),
     prisma.classSection.findMany({
-      where: { teacherId },
+      where: { teacherId, deletedAt: null },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),

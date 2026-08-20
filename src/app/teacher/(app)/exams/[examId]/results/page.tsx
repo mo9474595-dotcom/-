@@ -12,7 +12,7 @@ export default async function ResultsPage({
   const { examId } = await params;
 
   const exam = await prisma.exam.findUnique({ where: { id: examId } });
-  if (!exam || exam.teacherId !== teacherId) notFound();
+  if (!exam || exam.teacherId !== teacherId || exam.deletedAt) notFound();
 
   const attempts = await prisma.examAttempt.findMany({
     where: { examId },

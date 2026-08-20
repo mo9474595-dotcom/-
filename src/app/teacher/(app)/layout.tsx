@@ -45,6 +45,12 @@ export default async function TeacherAppLayout({
             <Link href="/teacher/audit-log" className="hover:text-blue-600">
               سجل التعديلات
             </Link>
+            <Link href="/teacher/trash" className="hover:text-blue-600">
+              سلة المحذوفات
+            </Link>
+            <a href="/api/teacher/export" className="hover:text-blue-600">
+              نسخة احتياطية
+            </a>
           </nav>
         </div>
       </header>

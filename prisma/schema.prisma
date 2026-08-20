@@ -42,12 +42,16 @@ enum AttendanceStatus {
 }
 
 model Teacher {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  // Bumped by "logout from all devices" — embedded in every issued JWT and
+  // checked on each request, so a stale/stolen token stops working
+  // immediately instead of waiting out its 12h expiry.
+  sessionVersion Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   exams         Exam[]
   classSections ClassSection[]
@@ -92,8 +96,11 @@ model ClassSection {
   projectWeight     Int @default(20)
   attendanceWeight  Int @default(10)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  // Soft-delete: hidden from normal listings when set, recoverable from the
+  // trash view until permanently purged.
+  deletedAt DateTime?
 
   students           StudentProfile[]
   projects           Project[]
@@ -227,6 +234,9 @@ model Exam {
   closesAt         DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  // Soft-delete: hidden from normal listings when set, recoverable from the
+  // trash view until permanently purged.
+  deletedAt        DateTime?
 
   teacherId String
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedExam } from "@/lib/exams";
+import { logAudit } from "@/lib/audit";
 import { examSchema } from "@/lib/validation";
 import { z } from "zod";
 
@@ -86,9 +87,16 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
   try {
     const teacherId = await requireTeacherId();
     const { examId } = await params;
-    await getOwnedExam(teacherId, examId);
+    const exam = await getOwnedExam(teacherId, examId);
 
-    await prisma.exam.delete({ where: { id: examId } });
+    // Soft delete: hidden immediately, recoverable from the trash page.
+    await prisma.exam.update({ where: { id: examId }, data: { deletedAt: new Date() } });
+    await logAudit({
+      teacherId,
+      action: "EXAM_DELETED",
+      summary: `تم نقل الامتحان "${exam.title}" إلى سلة المحذوفات`,
+      examId,
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     return handleApiError(err);

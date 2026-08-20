@@ -12,7 +12,7 @@ export default async function AttendanceListPage({
   const { classId } = await params;
 
   const classSection = await prisma.classSection.findUnique({ where: { id: classId } });
-  if (!classSection || classSection.teacherId !== teacherId) notFound();
+  if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) notFound();
 
   const sessions = await prisma.attendanceSession.findMany({
     where: { classSectionId: classId },

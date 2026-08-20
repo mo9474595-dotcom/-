@@ -67,7 +67,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       const classSection = await prisma.classSection.findUnique({
         where: { id: parsed.data.fromClassId },
       });
-      if (!classSection || classSection.teacherId !== teacherId) {
+      if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) {
         return NextResponse.json({ error: "الشعبة غير موجودة" }, { status: 404 });
       }
 

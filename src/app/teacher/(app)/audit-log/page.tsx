@@ -7,6 +7,10 @@ const actionLabels: Record<string, string> = {
   PROJECT_GRADE_SET: "درجة مشروع",
   ATTEMPT_ANSWER_GRADE_SET: "تصحيح إجابة",
   ATTEMPT_RESET: "إعادة تعيين محاولة",
+  CLASS_DELETED: "حذف شعبة",
+  CLASS_RESTORED: "استعادة شعبة",
+  EXAM_DELETED: "حذف امتحان",
+  EXAM_RESTORED: "استعادة امتحان",
 };
 
 export default async function AuditLogPage() {

@@ -34,7 +34,7 @@ export default async function StudentDetailPage({
   const { classId, studentId } = await params;
 
   const classSection = await prisma.classSection.findUnique({ where: { id: classId } });
-  if (!classSection || classSection.teacherId !== teacherId) notFound();
+  if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) notFound();
 
   const student = await prisma.studentProfile.findUnique({
     where: { id: studentId },

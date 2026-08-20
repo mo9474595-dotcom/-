@@ -12,7 +12,7 @@ export default async function ProjectsPage({
   const { classId } = await params;
 
   const classSection = await prisma.classSection.findUnique({ where: { id: classId } });
-  if (!classSection || classSection.teacherId !== teacherId) notFound();
+  if (!classSection || classSection.teacherId !== teacherId || classSection.deletedAt) notFound();
 
   const projects = await prisma.project.findMany({
     where: { classSectionId: classId },

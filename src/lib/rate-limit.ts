@@ -40,10 +40,30 @@ export function checkRateLimit(
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
+/** Clears a bucket outright — used to reset a per-account limiter on a successful action. */
+export function resetRateLimit(key: string) {
+  buckets.delete(key);
+}
+
 export function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "unknown";
+  // x-forwarded-for/x-real-ip are only trustworthy if a reverse proxy in
+  // front of this app sets them itself and strips any client-supplied
+  // value — otherwise a client can put anything it likes in that header
+  // and get a fresh rate-limit bucket on every request. Next.js's own
+  // `next start` server also sets x-forwarded-for to a constant local
+  // address internally, which would otherwise pool every real visitor
+  // into one bucket. So those headers are only used when the deployer has
+  // explicitly confirmed (via TRUST_PROXY_HEADERS=true) that a proxy they
+  // control is sanitizing them; the per-browser cookie id is used
+  // otherwise, since it's assigned by this server and can't be spoofed by
+  // the client the way a request header can.
+  if (process.env.TRUST_PROXY_HEADERS === "true") {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) return forwarded.split(",")[0].trim();
+    const realIp = req.headers.get("x-real-ip");
+    if (realIp) return realIp;
+  }
+  return req.cookies.get("rl_id")?.value ?? "unknown";
 }
 
 /**

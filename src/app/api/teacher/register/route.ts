@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     data: { name, email: normalizedEmail, passwordHash },
   });
 
-  await createTeacherSession(teacher.id);
+  await createTeacherSession(teacher.id, teacher.sessionVersion);
 
   return NextResponse.json({ id: teacher.id, name: teacher.name });
 }

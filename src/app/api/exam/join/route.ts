@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { handleApiError } from "@/lib/api-utils";
 import { joinExamSchema } from "@/lib/validation";
@@ -108,26 +109,41 @@ export async function POST(req: NextRequest) {
     const ipAddress =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
-    const attempt = await prisma.$transaction(async (tx) => {
-      const created = await tx.examAttempt.create({
-        data: {
-          examId: exam.id,
-          examCodeId: examCode.id,
-          studentName,
-          studentRef: studentRef || null,
-          sessionToken,
-          deadlineAt,
-          ipAddress,
-          questionOrder: JSON.stringify(orderedQuestionIds),
-          choiceOrderMap: JSON.stringify(choiceOrderMap),
-        },
+    let attempt;
+    try {
+      attempt = await prisma.$transaction(async (tx) => {
+        const created = await tx.examAttempt.create({
+          data: {
+            examId: exam.id,
+            examCodeId: examCode.id,
+            studentName,
+            studentRef: studentRef || null,
+            sessionToken,
+            deadlineAt,
+            ipAddress,
+            questionOrder: JSON.stringify(orderedQuestionIds),
+            choiceOrderMap: JSON.stringify(choiceOrderMap),
+          },
+        });
+        await tx.examCode.update({
+          where: { id: examCode.id },
+          data: { usedAt: now, studentName, studentRef: studentRef || null },
+        });
+        return created;
       });
-      await tx.examCode.update({
-        where: { id: examCode.id },
-        data: { usedAt: now, studentName, studentRef: studentRef || null },
-      });
-      return created;
-    });
+    } catch (err) {
+      // Two joins for the same code arrived at almost the same instant and
+      // both passed the earlier "not used yet" check; the DB's unique
+      // constraint on examCodeId is the real guard here — translate its
+      // rejection into the same friendly message the earlier check gives.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return NextResponse.json(
+          { error: "تم استخدام هذا الرمز بالفعل ولا يمكن إعادة الدخول" },
+          { status: 409 }
+        );
+      }
+      throw err;
+    }
 
     // Cookie outlives the exam a bit so the "submitted" confirmation page
     // still works after the deadline passes.
