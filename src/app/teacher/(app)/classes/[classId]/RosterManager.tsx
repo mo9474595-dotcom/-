@@ -17,6 +17,14 @@ export default function RosterManager({
   const [namesText, setNamesText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  function copyPortalLink(studentId: string, portalToken: string) {
+    const url = `${window.location.origin}/student/${portalToken}`;
+    navigator.clipboard?.writeText(url);
+    setCopiedId(studentId);
+    setTimeout(() => setCopiedId(null), 1500);
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -108,12 +116,20 @@ export default function RosterManager({
                 </td>
                 <td className="px-3 py-2 text-slate-600">{s.studentRef || "—"}</td>
                 <td className="px-3 py-2">
-                  <button
-                    onClick={() => handleDelete(s.id)}
-                    className="text-xs font-medium text-red-600 hover:underline"
-                  >
-                    حذف
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => copyPortalLink(s.id, s.portalToken)}
+                      className="text-xs font-medium text-blue-600 hover:underline"
+                    >
+                      {copiedId === s.id ? "تم النسخ ✓" : "نسخ رابط البوابة"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="text-xs font-medium text-red-600 hover:underline"
+                    >
+                      حذف
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

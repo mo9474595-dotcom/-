@@ -89,6 +89,10 @@ model StudentProfile {
   classSectionId String
   classSection   ClassSection @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
 
+  // Bearer token for the student's personal portal link — no password, no
+  // account. Regeneratable by the teacher if a link leaks.
+  portalToken String @unique @default(cuid())
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

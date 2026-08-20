@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import { computeClassRanking } from "@/lib/ranking";
 import ManualGradesManager from "./ManualGradesManager";
+import PortalLinkBox from "./PortalLinkBox";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -66,6 +67,8 @@ export default async function StudentDetailPage({
           <p className="text-sm text-slate-500">الرقم الجامعي: {student.studentRef}</p>
         )}
       </div>
+
+      <PortalLinkBox studentId={student.id} initialToken={student.portalToken} />
 
       {breakdown && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
