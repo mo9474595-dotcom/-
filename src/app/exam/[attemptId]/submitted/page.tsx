@@ -47,9 +47,18 @@ export default function SubmittedPage() {
   return (
     <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-        <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${info.iconBg}`}>
-          <Icon name={info.icon} size={28} />
-        </div>
+        {status === "SUBMITTED" || status == null ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/brand/illustrations/success-check.png"
+            alt=""
+            className="mx-auto mb-2 h-24 w-auto"
+          />
+        ) : (
+          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${info.iconBg}`}>
+            <Icon name={info.icon} size={28} />
+          </div>
+        )}
         <h1 className={`text-xl font-bold ${info.tone}`}>{info.title}</h1>
         <p className="mt-3 text-sm text-slate-600">{info.body}</p>
       </div>

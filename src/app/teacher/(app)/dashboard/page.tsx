@@ -14,18 +14,26 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">امتحاناتي</h1>
         <Link
           href="/teacher/exams/new"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          className="rounded-full bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-navy"
         >
           + امتحان جديد
         </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-brand-navy-dark">امتحاناتي</h1>
+          <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
+        </div>
       </div>
 
       {exams.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
-          لا توجد امتحانات بعد. ابدأ بإنشاء أول امتحان.
+        <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl bg-white p-12 text-center shadow-sm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/illustrations/empty-exams.png" alt="" className="h-40 w-auto" />
+          <div>
+            <p className="font-semibold text-slate-700">لا توجد امتحانات بعد</p>
+            <p className="mt-1 text-sm text-slate-500">ابدأ بإنشاء أول امتحان لتنظيم وإدارة اختباراتك بسهولة</p>
+          </div>
         </div>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -33,7 +41,7 @@ export default async function DashboardPage() {
             <Link
               key={exam.id}
               href={`/teacher/exams/${exam.id}`}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+              className="rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-semibold text-slate-900">{exam.title}</h2>

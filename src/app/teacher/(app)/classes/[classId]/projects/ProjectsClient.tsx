@@ -158,7 +158,14 @@ export default function ProjectsClient({
             );
           })}
           {projects.length === 0 && !showForm && (
-            <p className="py-6 text-center text-sm text-slate-500">لا توجد مشاريع بعد.</p>
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/illustrations/empty-projects.png" alt="" className="h-28 w-auto" />
+              <div>
+                <p className="font-semibold text-slate-700">لا توجد مشاريع بعد</p>
+                <p className="mt-1 text-sm text-slate-500">يمكنك إنشاء مشروع جديد لبدء إضافة المحتوى والطلاب</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
