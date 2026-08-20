@@ -57,6 +57,9 @@ test("deleting a class/exam moves it to trash, hides it, and restore brings it b
     .filter({ hasText: examTitle })
     .getByRole("button", { name: "استعادة" })
     .click();
+  // Wait for the restore request to actually complete before navigating —
+  // otherwise page.goto can cancel the in-flight fetch mid-request.
+  await expect(page.locator("li").filter({ hasText: examTitle })).toHaveCount(0);
 
   await page.goto("/teacher/dashboard");
   await expect(page.locator(`text=${examTitle}`)).toBeVisible();
