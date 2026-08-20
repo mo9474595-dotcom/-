@@ -45,19 +45,10 @@ export default function JoinExamPage() {
     <div className="flex flex-1 flex-col">
       <AppHeader title="دخول الطالب للامتحان" icon={<Icon name="graduationCap" size={18} />} />
 
-      <div className="relative flex flex-1 items-center justify-center gap-6 overflow-hidden bg-brand-page-tint px-4 py-16">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-brand-page-tint px-4 py-16">
         <div className="brand-dot-grid pointer-events-none absolute right-16 top-16 hidden h-28 w-40 text-brand-blue/20 sm:block" />
         <div className="brand-ring pointer-events-none absolute -left-16 top-1/3 hidden h-44 w-44 border-emerald-400/40 sm:block" />
         <div className="brand-ring pointer-events-none absolute -bottom-20 -left-10 hidden h-56 w-56 border-brand-blue/20 sm:block" />
-
-        <div className="relative hidden shrink-0 self-stretch overflow-hidden rounded-2xl shadow-lg lg:block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/photos/exam-hand.jpg"
-            alt=""
-            className="h-full w-64 object-cover"
-          />
-        </div>
 
         <div className="relative w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
