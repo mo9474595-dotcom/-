@@ -34,6 +34,13 @@ enum CheatEventType {
   SHORTCUT_BLOCKED
 }
 
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
 model Teacher {
   id           String   @id @default(cuid())
   name         String
@@ -42,7 +49,139 @@ model Teacher {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  exams Exam[]
+  exams         Exam[]
+  classSections ClassSection[]
+}
+
+// A roster (شعبة/فصل) the teacher manages. Grades, projects and attendance
+// are all scoped to one of these, and each student belongs to exactly one.
+model ClassSection {
+  id        String  @id @default(cuid())
+  name      String
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  // Weights used to compute each student's overall ranking score. Stored as
+  // whatever the teacher enters (not required to sum to 100) — the ranking
+  // calculation normalizes them and redistributes weight away from any
+  // category a student has no data in yet, so a partially-graded class
+  // still produces a fair comparison.
+  examWeight        Int @default(50)
+  manualGradeWeight Int @default(20)
+  projectWeight     Int @default(20)
+  attendanceWeight  Int @default(10)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  students           StudentProfile[]
+  projects           Project[]
+  attendanceSessions AttendanceSession[]
+}
+
+// A persistent student in a class roster, independent of any single exam
+// attempt. Exam codes generated "from a class" are pre-linked to one of
+// these so exam results roll up automatically into the student's record.
+model StudentProfile {
+  id             String       @id @default(cuid())
+  fullName       String
+  studentRef     String? // student ID / seat number, unique within the class
+  classSectionId String
+  classSection   ClassSection @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  examCodes         ExamCode[]
+  manualGrades      ManualGrade[]
+  projectGrades     ProjectGrade[]
+  attendanceRecords AttendanceRecord[]
+
+  @@index([classSectionId])
+}
+
+// A manually-entered grade (quiz, homework, participation, ...) that isn't
+// tied to the exam system or to a specific Project.
+model ManualGrade {
+  id       String   @id @default(cuid())
+  title    String
+  score    Float
+  maxScore Float
+  notes    String?
+  gradedAt DateTime @default(now())
+
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([studentProfileId])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  maxScore    Float     @default(100)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  classSectionId String
+  classSection   ClassSection @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
+
+  grades ProjectGrade[]
+}
+
+model ProjectGrade {
+  id        String    @id @default(cuid())
+  score     Float?
+  feedback  String?
+  gradedAt  DateTime?
+  updatedAt DateTime  @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, studentProfileId])
+}
+
+// One lecture/session date for a class. Attendance is recorded either by
+// the teacher directly or by students self-checking-in with a short-lived
+// code while the session is open.
+model AttendanceSession {
+  id    String   @id @default(cuid())
+  title String?
+  date  DateTime @default(now())
+
+  classSectionId String
+  classSection   ClassSection @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
+
+  selfCheckinCode     String?   @unique
+  selfCheckinOpensAt  DateTime?
+  selfCheckinClosesAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  records AttendanceRecord[]
+
+  @@index([classSectionId])
+}
+
+model AttendanceRecord {
+  id           String           @id @default(cuid())
+  status       AttendanceStatus @default(PRESENT)
+  markedBySelf Boolean          @default(false)
+  markedAt     DateTime         @default(now())
+
+  sessionId String
+  session   AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentProfileId])
 }
 
 model Exam {
@@ -107,7 +246,14 @@ model ExamCode {
   examId String
   exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
 
+  // Set when the code was generated from a class roster, so the resulting
+  // exam score rolls up automatically into that student's record.
+  studentProfileId String?
+  studentProfile   StudentProfile? @relation(fields: [studentProfileId], references: [id], onDelete: SetNull)
+
   attempt ExamAttempt?
+
+  @@index([studentProfileId])
 }
 
 model ExamAttempt {

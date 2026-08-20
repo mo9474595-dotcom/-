@@ -18,14 +18,17 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 export default function CodesClient({
   examId,
   initialCodes,
+  classes,
 }: {
   examId: string;
   initialCodes: CodeRow[];
+  classes: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [codes, setCodes] = useState(initialCodes);
   const [count, setCount] = useState(10);
   const [namesText, setNamesText] = useState("");
+  const [classId, setClassId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -40,12 +43,16 @@ export default function CodesClient({
       .map((n) => n.trim())
       .filter(Boolean);
 
+    const body = classId
+      ? { fromClassId: classId }
+      : studentNames.length > 0
+      ? { studentNames }
+      : { count };
+
     const res = await fetch(`/api/teacher/exams/${examId}/codes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(
-        studentNames.length > 0 ? { studentNames } : { count }
-      ),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     setLoading(false);
@@ -72,32 +79,56 @@ export default function CodesClient({
       >
         <h2 className="font-semibold text-slate-900">إنشاء رموز جديدة</h2>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-600">
-            عدد الرموز بدون أسماء
-          </label>
-          <input
-            type="number"
-            min={1}
-            max={500}
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-            className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
+        {classes.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-slate-600">
+              توليد لكل طلاب شعبة (يربط النتيجة تلقائياً بسجل كل طالب)
+            </label>
+            <select
+              value={classId}
+              onChange={(e) => setClassId(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="">— بدون شعبة —</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-600">
-            أو أدخل أسماء الطلاب (اسم في كل سطر) لإنشاء رمز مخصص لكل واحد
-          </label>
-          <textarea
-            value={namesText}
-            onChange={(e) => setNamesText(e.target.value)}
-            rows={4}
-            placeholder={"أحمد محمد\nسارة علي\n..."}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
+        {!classId && (
+          <>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-slate-600">
+                عدد الرموز بدون أسماء
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={count}
+                onChange={(e) => setCount(Number(e.target.value))}
+                className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-slate-600">
+                أو أدخل أسماء الطلاب (اسم في كل سطر) لإنشاء رمز مخصص لكل واحد
+              </label>
+              <textarea
+                value={namesText}
+                onChange={(e) => setNamesText(e.target.value)}
+                rows={4}
+                placeholder={"أحمد محمد\nسارة علي\n..."}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </>
+        )}
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 

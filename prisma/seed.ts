@@ -75,9 +75,65 @@ async function main() {
   }));
   await prisma.examCode.createMany({ data: codes });
 
+  const classSection = await prisma.classSection.create({
+    data: {
+      teacherId: teacher.id,
+      name: "الصف الأول أ",
+      examWeight: 50,
+      manualGradeWeight: 20,
+      projectWeight: 20,
+      attendanceWeight: 10,
+      students: {
+        create: [
+          { fullName: "أحمد محمد", studentRef: "101" },
+          { fullName: "سارة علي", studentRef: "102" },
+          { fullName: "خالد حسن", studentRef: "103" },
+        ],
+      },
+    },
+    include: { students: true },
+  });
+
+  const project = await prisma.project.create({
+    data: {
+      classSectionId: classSection.id,
+      title: "مشروع نهاية الفصل",
+      maxScore: 100,
+    },
+  });
+  await prisma.projectGrade.create({
+    data: {
+      projectId: project.id,
+      studentProfileId: classSection.students[0].id,
+      score: 88,
+      gradedAt: new Date(),
+    },
+  });
+
+  await prisma.manualGrade.create({
+    data: {
+      studentProfileId: classSection.students[0].id,
+      title: "اختبار قصير 1",
+      score: 8,
+      maxScore: 10,
+    },
+  });
+
+  const session = await prisma.attendanceSession.create({
+    data: { classSectionId: classSection.id, title: "محاضرة 1" },
+  });
+  await prisma.attendanceRecord.createMany({
+    data: [
+      { sessionId: session.id, studentProfileId: classSection.students[0].id, status: "PRESENT" },
+      { sessionId: session.id, studentProfileId: classSection.students[1].id, status: "LATE" },
+      { sessionId: session.id, studentProfileId: classSection.students[2].id, status: "ABSENT" },
+    ],
+  });
+
   console.log("Seed complete.");
   console.log("Teacher login:", email, "/", password);
   console.log("Exam codes:", codes.map((c) => c.code).join(", "));
+  console.log("Class section:", classSection.name, "with", classSection.students.length, "students");
 }
 
 main()

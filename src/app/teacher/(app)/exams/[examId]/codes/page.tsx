@@ -14,11 +14,18 @@ export default async function CodesPage({
   const exam = await prisma.exam.findUnique({ where: { id: examId } });
   if (!exam || exam.teacherId !== teacherId) notFound();
 
-  const codes = await prisma.examCode.findMany({
-    where: { examId },
-    orderBy: { createdAt: "desc" },
-    include: { attempt: { select: { status: true, score: true, maxScore: true } } },
-  });
+  const [codes, classes] = await Promise.all([
+    prisma.examCode.findMany({
+      where: { examId },
+      orderBy: { createdAt: "desc" },
+      include: { attempt: { select: { status: true, score: true, maxScore: true } } },
+    }),
+    prisma.classSection.findMany({
+      where: { teacherId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   return (
     <div>
@@ -27,7 +34,7 @@ export default async function CodesPage({
         كل طالب يحتاج رمزاً فريداً للدخول إلى الامتحان. الرمز يُستخدم مرة واحدة فقط ولا يمكن
         مشاركته بين جهازين في نفس الوقت.
       </p>
-      <CodesClient examId={examId} initialCodes={codes} />
+      <CodesClient examId={examId} initialCodes={codes} classes={classes} />
     </div>
   );
 }

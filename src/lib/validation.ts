@@ -50,6 +50,60 @@ export const answerSchema = z.object({
   textAnswer: z.string().max(5000).optional(),
 });
 
+export const classSectionSchema = z.object({
+  name: z.string().trim().min(1, "اسم الشعبة مطلوب").max(150),
+  examWeight: z.coerce.number().int().min(0).max(100).default(50),
+  manualGradeWeight: z.coerce.number().int().min(0).max(100).default(20),
+  projectWeight: z.coerce.number().int().min(0).max(100).default(20),
+  attendanceWeight: z.coerce.number().int().min(0).max(100).default(10),
+});
+
+export const studentSchema = z.object({
+  fullName: z.string().trim().min(1, "اسم الطالب مطلوب").max(150),
+  studentRef: z.string().trim().max(100).optional().or(z.literal("")),
+});
+
+export const bulkStudentsSchema = z.object({
+  students: z
+    .array(studentSchema)
+    .min(1, "أضف طالباً واحداً على الأقل")
+    .max(500),
+});
+
+export const manualGradeSchema = z.object({
+  title: z.string().trim().min(1, "عنوان الدرجة مطلوب").max(200),
+  score: z.coerce.number().min(0),
+  maxScore: z.coerce.number().min(0.01),
+  notes: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
+export const projectSchema = z.object({
+  title: z.string().trim().min(1, "عنوان المشروع مطلوب").max(200),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  maxScore: z.coerce.number().min(0.01).default(100),
+  dueDate: z.string().trim().optional().or(z.literal("")),
+});
+
+export const projectGradeSchema = z.object({
+  score: z.coerce.number().min(0).nullable(),
+  feedback: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
+export const attendanceSessionSchema = z.object({
+  title: z.string().trim().max(200).optional().or(z.literal("")),
+  date: z.string().trim().optional().or(z.literal("")),
+});
+
+export const attendanceRecordSchema = z.object({
+  studentProfileId: z.string().min(1),
+  status: z.enum(["PRESENT", "LATE", "ABSENT", "EXCUSED"]),
+});
+
+export const selfCheckinSchema = z.object({
+  code: z.string().trim().min(1).max(40),
+  studentProfileId: z.string().min(1),
+});
+
 export const cheatEventSchema = z.object({
   type: z.enum([
     "TAB_HIDDEN",

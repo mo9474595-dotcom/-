@@ -29,6 +29,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 const generateSchema = z.object({
   count: z.coerce.number().int().min(1).max(500).default(1),
   studentNames: z.array(z.string().trim().max(150)).optional(),
+  fromClassId: z.string().min(1).optional(),
 });
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
@@ -46,22 +47,65 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { studentNames } = parsed.data;
-    const count = studentNames?.length || parsed.data.count;
-
-    const codes: { code: string; studentName: string | null; examId: string }[] =
-      [];
+    let codes: {
+      code: string;
+      studentName: string | null;
+      studentProfileId: string | null;
+      examId: string;
+    }[] = [];
     const usedCodes = new Set<string>();
-    for (let i = 0; i < count; i++) {
+
+    function nextCode() {
       let code = generateExamCode();
       // Extremely unlikely, but avoid in-batch collisions.
       while (usedCodes.has(code)) code = generateExamCode();
       usedCodes.add(code);
-      codes.push({
-        code,
-        studentName: studentNames?.[i]?.trim() || null,
-        examId,
+      return code;
+    }
+
+    if (parsed.data.fromClassId) {
+      const classSection = await prisma.classSection.findUnique({
+        where: { id: parsed.data.fromClassId },
       });
+      if (!classSection || classSection.teacherId !== teacherId) {
+        return NextResponse.json({ error: "الشعبة غير موجودة" }, { status: 404 });
+      }
+
+      const students = await prisma.studentProfile.findMany({
+        where: { classSectionId: parsed.data.fromClassId },
+      });
+      const existingCodes = await prisma.examCode.findMany({
+        where: { examId, studentProfileId: { in: students.map((s) => s.id) } },
+        select: { studentProfileId: true },
+      });
+      const alreadyHasCode = new Set(existingCodes.map((c) => c.studentProfileId));
+
+      codes = students
+        .filter((s) => !alreadyHasCode.has(s.id))
+        .map((s) => ({
+          code: nextCode(),
+          studentName: s.fullName,
+          studentProfileId: s.id,
+          examId,
+        }));
+
+      if (codes.length === 0) {
+        return NextResponse.json(
+          { error: "كل طلاب هذه الشعبة لديهم رمز بالفعل لهذا الامتحان" },
+          { status: 400 }
+        );
+      }
+    } else {
+      const { studentNames } = parsed.data;
+      const count = studentNames?.length || parsed.data.count;
+      for (let i = 0; i < count; i++) {
+        codes.push({
+          code: nextCode(),
+          studentName: studentNames?.[i]?.trim() || null,
+          studentProfileId: null,
+          examId,
+        });
+      }
     }
 
     await prisma.examCode.createMany({ data: codes });
