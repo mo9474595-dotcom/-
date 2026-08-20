@@ -6,6 +6,7 @@ import type { Exam, Question, Choice } from "@prisma/client";
 import QuestionForm, { QuestionFormValue } from "@/components/QuestionForm";
 import { useUI } from "@/components/ui/UIProvider";
 import ExamScheduleEditor from "./ExamScheduleEditor";
+import Icon from "@/components/brand/Icon";
 
 type QuestionWithChoices = Question & { choices: Choice[] };
 type ExamWithQuestions = Exam & { questions: QuestionWithChoices[] };
@@ -120,13 +121,14 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm text-slate-500">
-              {exam.durationMinutes} دقيقة · حد المخالفات: {exam.maxTabViolations} ·{" "}
-              {exam.shuffleQuestions ? "أسئلة عشوائية" : "أسئلة بترتيب ثابت"} ·{" "}
-              {exam.shuffleChoices ? "خيارات عشوائية" : "خيارات بترتيب ثابت"}
+            <p className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+              <span className="flex items-center gap-1"><Icon name="clock" size={14} /> {exam.durationMinutes} دقيقة</span>
+              <span className="flex items-center gap-1"><Icon name="users" size={14} /> عدد المحاولات: {exam.maxTabViolations}</span>
+              <span className="flex items-center gap-1"><Icon name="clockHistory" size={14} /> {exam.shuffleQuestions ? "أسئلة عشوائية" : "أسئلة بترتيب ثابت"}</span>
+              <span className="flex items-center gap-1"><Icon name="clockHistory" size={14} /> {exam.shuffleChoices ? "خيارات عشوائية" : "خيارات بترتيب ثابت"}</span>
             </p>
             {exam.description && <p className="mt-1 text-sm text-slate-600">{exam.description}</p>}
           </div>
@@ -134,10 +136,11 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
             <button
               onClick={togglePublish}
               disabled={publishing}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
-                isPublished ? "bg-amber-600 hover:bg-amber-700" : "bg-green-600 hover:bg-green-700"
+              className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-60 ${
+                isPublished ? "bg-amber-600 hover:bg-amber-700" : "bg-brand-green hover:bg-brand-green-dark"
               }`}
             >
+              <Icon name="check" size={14} />
               {isPublished ? "إلغاء النشر" : "نشر الامتحان"}
             </button>
             {publishError && <p className="text-xs text-red-600">{publishError}</p>}
@@ -157,13 +160,16 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
         initialClosesAt={exam.closesAt}
       />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">الأسئلة ({exam.questions.length})</h2>
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            <Icon name="clipboard" size={17} className="text-brand-blue" />
+            الأسئلة ({exam.questions.length})
+          </h2>
           {!showAddForm && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="text-sm font-medium text-blue-600 hover:underline"
+              className="text-sm font-medium text-brand-blue hover:underline"
             >
               + إضافة سؤال
             </button>
@@ -182,7 +188,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
 
         <div className="mt-4 flex flex-col gap-3">
           {exam.questions.map((q, i) => (
-            <div key={q.id} className="rounded-xl border border-slate-200 p-4">
+            <div key={q.id} className="rounded-xl bg-brand-panel/40 p-4">
               {editingId === q.id ? (
                 <QuestionForm
                   submitLabel="حفظ التعديلات"
@@ -219,7 +225,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
                   <div className="mt-3 flex gap-3 text-sm">
                     <button
                       onClick={() => setEditingId(q.id)}
-                      className="font-medium text-blue-600 hover:underline"
+                      className="font-medium text-brand-blue hover:underline"
                     >
                       تعديل
                     </button>

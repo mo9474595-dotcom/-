@@ -43,7 +43,7 @@ export default function ResetAttemptButton({
     <button
       onClick={handleReset}
       disabled={loading}
-      className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+      className="rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
     >
       {loading ? "جارٍ إعادة التعيين..." : "إعادة تعيين المحاولة"}
     </button>

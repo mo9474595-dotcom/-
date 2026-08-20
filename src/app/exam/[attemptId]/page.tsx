@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useExamLockdown } from "@/components/useExamLockdown";
 import { useUI } from "@/components/ui/UIProvider";
 import type { ApiQuestion, ExamStateResponse } from "@/lib/exam-client-types";
+import Icon from "@/components/brand/Icon";
 
 type Phase = "intro" | "loading" | "active" | "submitting" | "done" | "error";
 
@@ -156,9 +157,12 @@ export default function ExamPage() {
 
   if (phase === "intro") {
     return (
-      <div className="flex flex-1 items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-bold text-slate-900">قبل أن تبدأ</h1>
+      <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+            <Icon name="shield" size={24} />
+          </div>
+          <h1 className="text-xl font-bold text-brand-navy-dark">قبل أن تبدأ</h1>
           <ul className="mt-4 flex flex-col gap-2 text-right text-sm text-slate-600">
             <li>• سيدخل المتصفح في وضع الشاشة الكاملة إلزامياً.</li>
             <li>• الخروج من الصفحة أو التبويب أو الشاشة الكاملة يُسجَّل ويُبلَّغ للأستاذ.</li>
@@ -168,7 +172,7 @@ export default function ExamPage() {
           </ul>
           <button
             onClick={handleStart}
-            className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            className="mt-6 w-full rounded-full bg-brand-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-navy"
           >
             ابدأ الامتحان بملء الشاشة
           </button>
@@ -196,25 +200,26 @@ export default function ExamPage() {
   }).length;
 
   return (
-    <div className="exam-lockdown flex flex-1 flex-col bg-slate-50">
+    <div className="exam-lockdown flex flex-1 flex-col bg-brand-page-tint">
       <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <h1 className="text-sm font-semibold text-slate-900 sm:text-base">{examTitle}</h1>
+          <div
+            className={`flex items-center gap-2 rounded-xl border px-3 py-1.5 font-mono font-semibold ${
+              remainingMs != null && remainingMs < 60_000
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-blue-100 bg-brand-panel text-brand-blue"
+            }`}
+          >
+            <Icon name="clock" size={16} />
+            {remainingMs != null ? formatTime(remainingMs) : "--:--"}
+          </div>
           <div className="flex items-center gap-3 text-sm">
             {violations > 0 && (
               <span className="rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-700">
                 مخالفات: {violations}
               </span>
             )}
-            <span
-              className={`rounded-full px-3 py-1 font-mono font-semibold ${
-                remainingMs != null && remainingMs < 60_000
-                  ? "bg-red-100 text-red-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
-              {remainingMs != null ? formatTime(remainingMs) : "--:--"}
-            </span>
+            <h1 className="text-sm font-semibold text-slate-900 sm:text-base">{examTitle}</h1>
           </div>
         </div>
       </div>
@@ -225,8 +230,8 @@ export default function ExamPage() {
         </div>
       )}
 
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6">
-        <div className="flex flex-wrap gap-2">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-4 py-6">
+        <div className="flex flex-wrap justify-center gap-2">
           {questions.map((q, i) => {
             const answered = Boolean(
               answers[q.id]?.selectedChoiceId || answers[q.id]?.textAnswer?.trim()
@@ -235,9 +240,9 @@ export default function ExamPage() {
               <button
                 key={q.id}
                 onClick={() => setIndex(i)}
-                className={`h-8 w-8 rounded-lg text-xs font-semibold ${
+                className={`h-8 w-8 rounded-lg text-xs font-semibold transition ${
                   i === index
-                    ? "bg-blue-600 text-white"
+                    ? "bg-brand-blue text-white"
                     : answered
                     ? "bg-green-100 text-green-700"
                     : "bg-white text-slate-500 border border-slate-200"
@@ -253,11 +258,16 @@ export default function ExamPage() {
         </p>
 
         {current && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <p className="text-xs font-medium text-slate-500">
-              سؤال {index + 1} من {questions.length} · {current.points} درجة
-            </p>
-            <p className="mt-2 text-lg font-medium text-slate-900">{current.text}</p>
+          <div className="w-full rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark">
+                درجة {current.points}
+              </span>
+              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark">
+                سؤال {index + 1} من {questions.length}
+              </span>
+            </div>
+            <p className="mt-4 text-lg font-medium text-slate-900">{current.text}</p>
 
             {current.type !== "SHORT_ANSWER" ? (
               <div className="mt-5 flex flex-col gap-2">
@@ -266,7 +276,7 @@ export default function ExamPage() {
                     key={c.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition ${
                       answers[current.id]?.selectedChoiceId === c.id
-                        ? "border-blue-500 bg-blue-50"
+                        ? "border-brand-blue bg-brand-panel"
                         : "border-slate-200 hover:bg-slate-50"
                     }`}
                   >
@@ -275,6 +285,7 @@ export default function ExamPage() {
                       name={current.id}
                       checked={answers[current.id]?.selectedChoiceId === c.id}
                       onChange={() => setChoice(current.id, c.id)}
+                      className="accent-brand-blue"
                     />
                     {c.text}
                   </label>
@@ -286,7 +297,7 @@ export default function ExamPage() {
                 onChange={(e) => setText(current.id, e.target.value)}
                 rows={5}
                 placeholder="اكتب إجابتك هنا..."
-                className="mt-5 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="mt-5 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
               />
             )}
 
@@ -294,16 +305,16 @@ export default function ExamPage() {
               <button
                 onClick={() => setIndex((i) => Math.max(0, i - 1))}
                 disabled={index === 0}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-40"
               >
-                السابق
+                السابق ‹
               </button>
               {index < questions.length - 1 ? (
                 <button
                   onClick={() => setIndex((i) => Math.min(questions.length - 1, i + 1))}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy"
                 >
-                  التالي
+                  › التالي
                 </button>
               ) : (
                 <button
@@ -316,8 +327,9 @@ export default function ExamPage() {
                     });
                     if (ok) submit();
                   }}
-                  className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                  className="flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-green-dark"
                 >
+                  <Icon name="save" size={14} />
                   تسليم الامتحان
                 </button>
               )}

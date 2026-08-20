@@ -6,6 +6,7 @@ import type { ExamCode, ExamAttempt } from "@prisma/client";
 import ScoreFraction from "@/components/ScoreFraction";
 import { usePagedSearch } from "@/components/ui/usePagedSearch";
 import PaginationBar from "@/components/ui/PaginationBar";
+import Icon from "@/components/brand/Icon";
 
 type CodeRow = ExamCode & {
   attempt: Pick<ExamAttempt, "status" | "score" | "maxScore"> | null;
@@ -81,9 +82,12 @@ export default function CodesClient({
     <div className="mt-6 flex flex-col gap-6">
       <form
         onSubmit={handleGenerate}
-        className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5"
+        className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm"
       >
-        <h2 className="font-semibold text-slate-900">إنشاء رموز جديدة</h2>
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="key" size={17} className="text-brand-blue" />
+          إنشاء رموز جديدة
+        </h2>
 
         {classes.length > 0 && (
           <div className="flex flex-col gap-1">
@@ -93,7 +97,7 @@ export default function CodesClient({
             <select
               value={classId}
               onChange={(e) => setClassId(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
             >
               <option value="">— بدون شعبة —</option>
               {classes.map((c) => (
@@ -117,7 +121,7 @@ export default function CodesClient({
                 max={500}
                 value={count}
                 onChange={(e) => setCount(Number(e.target.value))}
-                className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-32 rounded-xl border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
 
@@ -130,7 +134,7 @@ export default function CodesClient({
                 onChange={(e) => setNamesText(e.target.value)}
                 rows={4}
                 placeholder={"أحمد محمد\nسارة علي\n..."}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
           </>
@@ -141,8 +145,9 @@ export default function CodesClient({
         <button
           type="submit"
           disabled={loading}
-          className="self-start rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="flex items-center gap-1.5 self-start rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
+          +
           {loading ? "جارٍ الإنشاء..." : "إنشاء الرموز"}
         </button>
       </form>
@@ -157,7 +162,7 @@ export default function CodesClient({
         <span className="shrink-0 text-xs text-slate-500">{codes.length} رمز إجمالاً</span>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-right text-slate-500">
@@ -192,9 +197,10 @@ export default function CodesClient({
                   <td className="px-4 py-3">
                     <button
                       onClick={() => copyCode(c.code)}
-                      className="text-xs font-medium text-blue-600 hover:underline"
+                      className="flex items-center gap-1 text-xs font-medium text-brand-blue hover:underline"
                     >
-                      {copiedCode === c.code ? "تم النسخ ✓" : "نسخ"}
+                      <Icon name="clipboard" size={13} />
+                      {copiedCode === c.code ? "تم النسخ" : "نسخ"}
                     </button>
                   </td>
                 </tr>

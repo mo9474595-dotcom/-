@@ -87,21 +87,21 @@ function GradeRow({
           step="0.5"
           value={score}
           onChange={(e) => setScore(Number(e.target.value))}
-          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-sm"
+          className="w-24 rounded-xl border border-slate-300 px-2 py-1 text-sm"
         />
       </td>
       <td className="px-4 py-3">
         <input
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"
+          className="w-full rounded-xl border border-slate-300 px-2 py-1 text-sm"
         />
       </td>
       <td className="px-4 py-3">
         <button
           onClick={() => onSave(row.student.id, score, feedback)}
           disabled={saving}
-          className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="rounded-full bg-brand-blue px-3 py-1 text-xs font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
           {saving ? "..." : "حفظ"}
         </button>

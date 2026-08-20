@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { computeClassRanking } from "@/lib/ranking";
 import QuickJoinButton from "@/components/QuickJoinButton";
 import ScoreFraction from "@/components/ScoreFraction";
+import Icon from "@/components/brand/Icon";
+import OrgLogo from "@/components/brand/OrgLogo";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -59,24 +61,27 @@ export default async function StudentPortalPage({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">أهلاً {student.fullName}</h1>
-        <p className="text-sm text-slate-500">{student.classSection.name}</p>
+      <div className="flex items-center gap-3">
+        <OrgLogo size={48} />
+        <div>
+          <h1 className="text-2xl font-bold text-brand-navy-dark">أهلاً {student.fullName}</h1>
+          <p className="text-sm text-slate-500">{student.classSection.name}</p>
+        </div>
       </div>
 
       {breakdown && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center">
-            <p className="text-xs text-blue-700">ترتيبك في الشعبة</p>
-            <p className="mt-1 text-xl font-bold text-blue-900">
+          <div className="rounded-2xl bg-brand-panel p-4 text-center">
+            <p className="text-xs text-brand-navy-dark">ترتيبك في الشعبة</p>
+            <p className="mt-1 text-xl font-bold text-brand-navy-dark">
               {position + 1} من {ranking.length}
             </p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-center">
+          <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
             <p className="text-xs text-slate-500">المعدل العام</p>
             <p className="mt-1 text-xl font-bold text-slate-900">{pct(breakdown.overallPct)}</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-center">
+          <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
             <p className="text-xs text-slate-500">الحضور</p>
             <p className="mt-1 text-xl font-bold text-slate-900">{pct(breakdown.attendancePct)}</p>
           </div>
@@ -84,13 +89,16 @@ export default async function StudentPortalPage({
       )}
 
       {availableExams.length > 0 && (
-        <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
-          <h2 className="font-semibold text-green-900">امتحانات متاحة لك</h2>
+        <div className="rounded-2xl bg-brand-panel p-5">
+          <h2 className="flex items-center gap-2 font-semibold text-brand-navy-dark">
+            <Icon name="clipboard" size={17} />
+            امتحانات متاحة لك
+          </h2>
           <div className="mt-3 flex flex-col gap-3">
             {availableExams.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-xl bg-white p-3"
+                className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-sm"
               >
                 <div>
                   <p className="font-medium text-slate-900">{c.exam.title}</p>
@@ -108,8 +116,11 @@ export default async function StudentPortalPage({
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">نتائج الامتحانات</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="scale" size={17} className="text-brand-blue" />
+          نتائج الامتحانات
+        </h2>
         {finishedExams.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لا توجد نتائج بعد.</p>
         ) : (
@@ -128,8 +139,11 @@ export default async function StudentPortalPage({
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">درجات أخرى ومشاريع</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="bulb" size={17} className="text-brand-blue" />
+          درجات أخرى ومشاريع
+        </h2>
         {student.manualGrades.length === 0 && student.projectGrades.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لا توجد درجات بعد.</p>
         ) : (
@@ -156,8 +170,11 @@ export default async function StudentPortalPage({
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">سجل الحضور</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+          سجل الحضور
+        </h2>
         {student.attendanceRecords.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لا يوجد سجل حضور بعد.</p>
         ) : (

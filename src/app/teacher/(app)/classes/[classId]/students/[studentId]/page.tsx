@@ -6,6 +6,7 @@ import { computeClassRanking } from "@/lib/ranking";
 import ManualGradesManager from "./ManualGradesManager";
 import PortalLinkBox from "./PortalLinkBox";
 import ScoreFraction from "@/components/ScoreFraction";
+import Icon from "@/components/brand/Icon";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -23,6 +24,14 @@ const attemptStatusLabels: Record<string, string> = {
 
 function pct(v: number | null) {
   return v == null ? "—" : `${v.toFixed(1)}%`;
+}
+
+function qualityLabel(v: number | null) {
+  if (v == null) return "—";
+  if (v >= 90) return "ممتاز";
+  if (v >= 75) return "جيد جداً";
+  if (v >= 60) return "جيد";
+  return "يحتاج متابعة";
 }
 
 export default async function StudentDetailPage({
@@ -54,19 +63,34 @@ export default async function StudentDetailPage({
 
   const finishedExams = student.examCodes.filter((c) => c.attempt);
 
+  const statCards: { label: string; value: number | null; icon: "calendarCheck" | "folder" | "bulb" | "clipboard" | "scale" }[] = [
+    { label: "المعدل العام", value: breakdown?.overallPct ?? null, icon: "scale" },
+    { label: "الامتحانات", value: breakdown?.examPct ?? null, icon: "clipboard" },
+    { label: "درجات أخرى", value: breakdown?.manualPct ?? null, icon: "bulb" },
+    { label: "المشاريع", value: breakdown?.projectPct ?? null, icon: "folder" },
+    { label: "الحضور", value: breakdown?.attendancePct ?? null, icon: "calendarCheck" },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <Link
           href={`/teacher/classes/${classId}`}
-          className="text-sm font-medium text-blue-600 hover:underline"
+          className="text-sm font-medium text-brand-blue hover:underline"
         >
-          ← العودة إلى {classSection.name}
+          العودة إلى ملف الطالب ‹ {classSection.name}
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">{student.fullName}</h1>
-        {student.studentRef && (
-          <p className="text-sm text-slate-500">الرقم الجامعي: {student.studentRef}</p>
-        )}
+        <div className="mt-2 flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+            <Icon name="user" size={20} />
+          </span>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{student.fullName}</h1>
+            {student.studentRef && (
+              <p className="text-sm text-slate-500">الرقم الجامعي: {student.studentRef}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       <PortalLinkBox
@@ -78,25 +102,26 @@ export default async function StudentDetailPage({
 
       {breakdown && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {[
-            { label: "المعدل العام", value: pct(breakdown.overallPct), strong: true },
-            { label: "الامتحانات", value: pct(breakdown.examPct) },
-            { label: "درجات أخرى", value: pct(breakdown.manualPct) },
-            { label: "المشاريع", value: pct(breakdown.projectPct) },
-            { label: "الحضور", value: pct(breakdown.attendancePct) },
-          ].map((item) => (
-            <div key={item.label} className="rounded-xl border border-slate-200 bg-white p-4 text-center">
-              <p className="text-xs text-slate-500">{item.label}</p>
-              <p className={`mt-1 ${item.strong ? "text-xl font-bold text-blue-700" : "font-semibold text-slate-800"}`}>
-                {item.value}
-              </p>
+          {statCards.map((item) => (
+            <div key={item.label} className="rounded-2xl bg-white p-4 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-xs text-slate-500">{item.label}</p>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+                  <Icon name={item.icon} size={13} />
+                </span>
+              </div>
+              <p className="mt-1 text-xl font-bold text-brand-navy-dark">{pct(item.value)}</p>
+              <p className="text-xs text-slate-400">{qualityLabel(item.value)}</p>
             </div>
           ))}
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">نتائج الامتحانات</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="clipboard" size={17} className="text-brand-blue" />
+          نتائج الامتحانات
+        </h2>
         {finishedExams.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لم يخض هذا الطالب أي امتحان بعد.</p>
         ) : (
@@ -127,8 +152,11 @@ export default async function StudentDetailPage({
 
       <ManualGradesManager studentId={studentId} initialGrades={student.manualGrades} />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">درجات المشاريع</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="folder" size={17} className="text-brand-blue" />
+          درجات المشاريع
+        </h2>
         {student.projectGrades.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لا توجد درجات مشاريع بعد.</p>
         ) : (
@@ -153,8 +181,11 @@ export default async function StudentDetailPage({
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">سجل الحضور</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+          سجل الحضور
+        </h2>
         {student.attendanceRecords.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">لا يوجد سجل حضور بعد.</p>
         ) : (

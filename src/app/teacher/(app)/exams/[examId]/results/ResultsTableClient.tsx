@@ -4,6 +4,7 @@ import Link from "next/link";
 import ScoreFraction from "@/components/ScoreFraction";
 import { usePagedSearch } from "@/components/ui/usePagedSearch";
 import PaginationBar from "@/components/ui/PaginationBar";
+import Icon from "@/components/brand/Icon";
 
 type Attempt = {
   id: string;
@@ -39,12 +40,12 @@ export default function ResultsTableClient({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ابحث باسم الطالب..."
-          className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="w-full max-w-xs rounded-xl border border-slate-300 px-3 py-2 text-sm"
         />
         <span className="shrink-0 text-xs text-slate-500">{attempts.length} محاولة إجمالاً</span>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-right text-slate-500">
@@ -88,8 +89,9 @@ export default function ResultsTableClient({
                   <td className="px-4 py-3">
                     <Link
                       href={`/teacher/exams/${examId}/results/${a.id}`}
-                      className="text-xs font-medium text-blue-600 hover:underline"
+                      className="flex items-center gap-1 rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-blue hover:bg-blue-100"
                     >
+                      <Icon name="search" size={12} />
                       عرض التفاصيل
                     </Link>
                   </td>

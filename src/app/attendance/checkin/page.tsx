@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Icon from "@/components/brand/Icon";
 
 type Student = { id: string; fullName: string; studentRef: string | null };
 
@@ -84,9 +85,12 @@ function CheckinForm() {
   );
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">تسجيل الحضور</h1>
+    <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+          <Icon name="calendarCheck" size={22} />
+        </div>
+        <h1 className="text-center text-xl font-bold text-brand-navy-dark">تسجيل الحضور</h1>
 
         {phase === "code" || phase === "error" ? (
           <form onSubmit={loadCode} className="mt-6 flex flex-col gap-4">
@@ -97,14 +101,14 @@ function CheckinForm() {
                 onChange={(e) => setCode(e.target.value)}
                 required
                 placeholder="XXXXXX"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-widest outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="rounded-xl border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-widest outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
               />
             </div>
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              className="rounded-full bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
             >
               {loading ? "جارٍ التحقق..." : "التالي"}
             </button>
@@ -119,7 +123,7 @@ function CheckinForm() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="ابحث عن اسمك..."
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
             />
             <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200">
               {filtered.map((s) => (
@@ -127,7 +131,7 @@ function CheckinForm() {
                   key={s.id}
                   onClick={() => checkin(s.id)}
                   disabled={loading}
-                  className="block w-full border-b border-slate-100 px-3 py-2 text-right text-sm last:border-0 hover:bg-blue-50 disabled:opacity-60"
+                  className="block w-full border-b border-slate-100 px-3 py-2 text-right text-sm last:border-0 hover:bg-brand-panel disabled:opacity-60"
                 >
                   {s.fullName}
                   {s.studentRef && (

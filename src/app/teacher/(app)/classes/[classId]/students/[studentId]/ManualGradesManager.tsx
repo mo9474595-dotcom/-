@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ManualGrade } from "@prisma/client";
 import ScoreFraction from "@/components/ScoreFraction";
+import Icon from "@/components/brand/Icon";
 
 export default function ManualGradesManager({
   studentId,
@@ -54,13 +55,16 @@ export default function ManualGradesManager({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900">درجات أخرى (اختبارات قصيرة، واجبات...)</h2>
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="bulb" size={17} className="text-brand-blue" />
+          درجات أخرى (اختبارات قصيرة، واجبات...)
+        </h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="text-sm font-medium text-blue-600 hover:underline"
+            className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline"
           >
             + إضافة درجة
           </button>
@@ -71,19 +75,19 @@ export default function ManualGradesManager({
         <form onSubmit={handleAdd} className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-4">
           <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
             <label className="text-xs text-slate-600">العنوان</label>
-            <input name="title" required className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input name="title" required className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs text-slate-600">الدرجة</label>
-            <input name="score" type="number" step="0.1" min={0} required className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input name="score" type="number" step="0.1" min={0} required className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs text-slate-600">من</label>
-            <input name="maxScore" type="number" step="0.1" min={0.1} required defaultValue={10} className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input name="maxScore" type="number" step="0.1" min={0.1} required defaultValue={10} className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs text-slate-600">ملاحظات (اختياري)</label>
-            <input name="notes" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input name="notes" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           {error && (
             <p className="col-span-full rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
@@ -92,14 +96,14 @@ export default function ManualGradesManager({
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
             >
               {loading ? "جارٍ الحفظ..." : "إضافة"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               إلغاء
             </button>

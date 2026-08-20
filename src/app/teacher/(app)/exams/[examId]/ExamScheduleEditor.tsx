@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUI } from "@/components/ui/UIProvider";
+import Icon from "@/components/brand/Icon";
 
 function toLocalInputValue(date: Date | null): string {
   if (!date) return "";
@@ -50,8 +51,11 @@ export default function ExamScheduleEditor({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="font-semibold text-slate-900">جدولة الدخول (اختياري)</h2>
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+        <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+        جدولة الدخول (اختياري)
+      </h2>
       <p className="mt-1 text-xs text-slate-500">
         بالإضافة إلى النشر، يمكنك تحديد وقت فتح وإغلاق تلقائي للدخول إلى الامتحان. اتركهما
         فارغين لعدم التقييد بوقت محدد.
@@ -63,7 +67,7 @@ export default function ExamScheduleEditor({
             type="datetime-local"
             value={opensAt}
             onChange={(e) => setOpensAt(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -72,7 +76,7 @@ export default function ExamScheduleEditor({
             type="datetime-local"
             value={closesAt}
             onChange={(e) => setClosesAt(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
       </div>
@@ -80,8 +84,9 @@ export default function ExamScheduleEditor({
       <button
         onClick={save}
         disabled={saving}
-        className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        className="mt-3 flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
       >
+        <Icon name="save" size={14} />
         {saving ? "جارٍ الحفظ..." : "حفظ الجدولة"}
       </button>
     </div>

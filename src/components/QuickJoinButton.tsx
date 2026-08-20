@@ -40,7 +40,7 @@ export default function QuickJoinButton({
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
       >
         {loading ? "..." : label}
       </button>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { StudentBreakdown } from "@/lib/ranking";
+import Icon from "@/components/brand/Icon";
 
 function pct(v: number | null) {
   return v == null ? "—" : `${v.toFixed(1)}%`;
@@ -17,8 +18,11 @@ export default function RankingTable({
   const bottom = ranked.length > 1 ? ranked[ranked.length - 1] : null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="font-semibold text-slate-900">ترتيب الطلاب</h2>
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+        <Icon name="users" size={17} className="text-brand-blue" />
+        ترتيب الطلاب
+      </h2>
 
       {ranking.length === 0 ? (
         <p className="mt-4 text-sm text-slate-500">أضف طلاباً لعرض الترتيب.</p>
@@ -65,7 +69,7 @@ export default function RankingTable({
                     <td className="px-3 py-2">
                       <Link
                         href={`/teacher/classes/${classId}/students/${r.studentId}`}
-                        className="font-medium text-blue-600 hover:underline"
+                        className="font-medium text-brand-blue hover:underline"
                       >
                         {r.fullName}
                       </Link>

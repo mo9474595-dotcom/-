@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useUI } from "@/components/ui/UIProvider";
+import Icon from "@/components/brand/Icon";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -35,17 +36,19 @@ export default function LogoutButton() {
   return (
     <div className="flex items-center gap-2">
       <button
-        onClick={handleLogout}
-        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-      >
-        تسجيل الخروج
-      </button>
-      <button
         onClick={handleLogoutAll}
         title="إنهاء كل الجلسات النشطة على كل الأجهزة"
-        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
+        className="hidden items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 sm:flex"
       >
-        من كل الأجهزة
+        <Icon name="laptop" size={16} />
+        من خلال الأجهزة
+      </button>
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+      >
+        <Icon name="power" size={16} />
+        تسجيل الخروج
       </button>
     </div>
   );

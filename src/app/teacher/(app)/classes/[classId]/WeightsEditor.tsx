@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ClassSection } from "@prisma/client";
+import Icon from "@/components/brand/Icon";
 
 export default function WeightsEditor({ classSection }: { classSection: ClassSection }) {
   const router = useRouter();
@@ -40,8 +41,11 @@ export default function WeightsEditor({ classSection }: { classSection: ClassSec
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="font-semibold text-slate-900">أوزان حساب الترتيب العام</h2>
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+        <Icon name="scale" size={17} className="text-brand-blue" />
+        أوزان حساب الترتيب العام
+      </h2>
       <p className="mt-1 text-xs text-slate-500">
         لا يشترط أن يكون المجموع 100 — إذا لم يكن للطالب بيانات في أحد البنود يُعاد توزيع
         وزنه تلقائياً على البنود المتوفرة له.
@@ -51,16 +55,21 @@ export default function WeightsEditor({ classSection }: { classSection: ClassSec
         {fields.map((f) => (
           <div key={f.key} className="flex flex-col gap-1">
             <label className="text-xs text-slate-600">{f.label} (٪)</label>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={weights[f.key]}
-              onChange={(e) =>
-                setWeights((w) => ({ ...w, [f.key]: Number(e.target.value) }))
-              }
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={weights[f.key]}
+                onChange={(e) =>
+                  setWeights((w) => ({ ...w, [f.key]: Number(e.target.value) }))
+                }
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 pl-6 text-sm"
+              />
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                %
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -72,11 +81,16 @@ export default function WeightsEditor({ classSection }: { classSection: ClassSec
         <button
           onClick={save}
           disabled={saving}
-          className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
+          <Icon name="save" size={15} />
           {saving ? "جارٍ الحفظ..." : "حفظ الأوزان"}
         </button>
-        {saved && <span className="text-xs text-green-700">تم الحفظ ✓</span>}
+        {saved && (
+          <span className="flex items-center gap-1 text-xs text-green-700">
+            <Icon name="check" size={13} /> تم الحفظ
+          </span>
+        )}
       </div>
     </div>
   );

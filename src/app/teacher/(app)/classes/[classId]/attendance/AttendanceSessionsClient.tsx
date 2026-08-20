@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AttendanceSession } from "@prisma/client";
 import { useUI } from "@/components/ui/UIProvider";
+import Icon from "@/components/brand/Icon";
 
 type SessionWithRecords = AttendanceSession & { records: { status: string }[] };
 
@@ -56,14 +57,14 @@ export default function AttendanceSessionsClient({
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+      <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-3 rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-1">
           <label className="text-xs text-slate-600">عنوان الجلسة (اختياري)</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="محاضرة 3"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -72,13 +73,13 @@ export default function AttendanceSessionsClient({
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
           {loading ? "جارٍ الإنشاء..." : "+ جلسة جديدة"}
         </button>
@@ -90,18 +91,23 @@ export default function AttendanceSessionsClient({
           return (
             <div
               key={s.id}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4"
+              className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm"
             >
-              <div>
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+                  <Icon name="calendarCheck" size={16} />
+                </span>
+                <div>
                 <p className="font-medium text-slate-900">{s.title || "جلسة بدون عنوان"}</p>
                 <p className="text-sm text-slate-500">
                   {new Date(s.date).toLocaleDateString("ar")} · {present} حاضر من {s.records.length} مسجَّل
                 </p>
+                </div>
               </div>
               <div className="flex gap-3 text-sm">
                 <Link
                   href={`/teacher/classes/${classId}/attendance/${s.id}`}
-                  className="font-medium text-blue-600 hover:underline"
+                  className="font-medium text-brand-blue hover:underline"
                 >
                   تسجيل الحضور
                 </Link>

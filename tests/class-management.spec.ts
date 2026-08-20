@@ -78,7 +78,7 @@ test("teacher builds a class roster, grades a project, marks attendance, and the
   await page.waitForURL(/\/students\/[^/]+$/);
   // This goes through the app's own confirm modal, not a native browser
   // dialog — click its real confirm button.
-  await page.click('button:has-text("إبطال الرابط وتوليد رابط جديد")');
+  await page.click('button:has-text("توليد رابط جديد")');
   await page.getByRole("button", { name: "إبطال وتوليد رابط جديد", exact: true }).click();
   await page.waitForTimeout(500);
 

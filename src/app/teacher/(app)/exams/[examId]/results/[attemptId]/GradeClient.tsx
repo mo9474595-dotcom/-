@@ -31,7 +31,7 @@ export default function GradeClient({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
       <h2 className="font-semibold text-slate-900">الإجابات</h2>
       <div className="mt-4 flex flex-col gap-4">
         {items.map(({ question, answer }, i) => (
@@ -107,13 +107,13 @@ function ShortAnswerGrader({
         max={maxPoints}
         value={points}
         onChange={(e) => setPoints(Number(e.target.value))}
-        className="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm"
+        className="w-20 rounded-xl border border-slate-300 px-2 py-1 text-sm"
       />
       <span className="text-xs text-slate-500">/ {maxPoints}</span>
       <button
         onClick={() => onSave(points)}
         disabled={disabled}
-        className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        className="rounded-full bg-brand-blue px-3 py-1 text-xs font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
       >
         حفظ الدرجة
       </button>

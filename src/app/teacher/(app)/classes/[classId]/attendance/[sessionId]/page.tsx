@@ -31,9 +31,10 @@ export default async function AttendanceSessionPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">
+      <h1 className="text-2xl font-bold text-brand-navy-dark">
         {session.title || "جلسة حضور"} — {new Date(session.date).toLocaleDateString("ar")}
       </h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
       <AttendanceMarkingClient session={session} initialRows={rows} />
     </div>
   );

@@ -29,7 +29,8 @@ export default async function CodesPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">رموز الدخول — {exam.title}</h1>
+      <h1 className="text-2xl font-bold text-brand-navy-dark">رموز الدخول — {exam.title}</h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
       <p className="mt-1 text-sm text-slate-500">
         كل طالب يحتاج رمزاً فريداً للدخول إلى الامتحان. الرمز يُستخدم مرة واحدة فقط ولا يمكن
         مشاركته بين جهازين في نفس الوقت.

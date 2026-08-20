@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
+import Icon from "@/components/brand/Icon";
 
 const actionLabels: Record<string, string> = {
   MANUAL_GRADE_SET: "درجة يدوية",
@@ -24,13 +25,17 @@ export default async function AuditLogPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">سجل التعديلات</h1>
+      <h1 className="flex items-center gap-2 text-2xl font-bold text-brand-navy-dark">
+        سجل التعديلات
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+          <Icon name="clockHistory" size={17} />
+        </span>
+      </h1>
       <p className="mt-1 text-sm text-slate-500">
-        سجل بكل الإجراءات الحساسة التي قمت بها (تعديل درجات، إعادة تعيين محاولات...)، لآخر
-        200 إجراء.
+        سجل يدخل الإجراءات الحساسة التي تمت من قبل المعلم. يمكنك عرض آخر 200 إجراء.
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-right text-slate-500">
@@ -46,7 +51,7 @@ export default async function AuditLogPage() {
                   {new Date(log.createdAt).toLocaleString("ar")}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">
-                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                  <span className="rounded-full bg-brand-panel px-2.5 py-0.5 text-xs font-medium text-brand-navy-dark">
                     {actionLabels[log.action] ?? log.action}
                   </span>
                 </td>
@@ -55,8 +60,12 @@ export default async function AuditLogPage() {
             ))}
             {logs.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
-                  لا توجد إجراءات مسجَّلة بعد.
+                <td colSpan={3} className="px-4 py-12 text-center">
+                  <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+                    <Icon name="folder" size={28} />
+                  </span>
+                  <p className="mt-3 font-semibold text-slate-700">لا توجد إجراءات مسجَّلة بعد</p>
+                  <p className="mt-1 text-sm text-slate-500">لم يتم تنفيذ أي إجراءات حساسة بعد.</p>
                 </td>
               </tr>
             )}

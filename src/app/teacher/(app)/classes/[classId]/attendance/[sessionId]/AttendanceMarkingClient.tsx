@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { AttendanceSession, AttendanceRecord, StudentProfile } from "@prisma/client";
+import Icon from "@/components/brand/Icon";
 
 type Row = { student: StudentProfile; record: AttendanceRecord | null };
 
@@ -74,13 +75,16 @@ export default function AttendanceMarkingClient({
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">تسجيل حضور ذاتي</h2>
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="globe" size={16} className="text-brand-blue" />
+          تسجيل حضور ذاتي
+        </h2>
         {isOpen && checkinCode ? (
           <div className="mt-3 flex flex-wrap items-center gap-4">
             <div>
               <p className="text-xs text-slate-500">رمز الحضور (صالح حتى إغلاقه)</p>
-              <p className="font-mono text-2xl font-bold tracking-widest text-blue-700">
+              <p className="font-mono text-2xl font-bold tracking-widest text-brand-blue">
                 {checkinCode}
               </p>
               {checkinUrl && <p className="text-xs text-slate-400">{checkinUrl}</p>}
@@ -88,7 +92,7 @@ export default function AttendanceMarkingClient({
             <button
               onClick={() => toggleCheckin("close")}
               disabled={toggling}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
             >
               إغلاق التسجيل الذاتي
             </button>
@@ -103,13 +107,13 @@ export default function AttendanceMarkingClient({
                 max={180}
                 value={minutes}
                 onChange={(e) => setMinutes(Number(e.target.value))}
-                className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-24 rounded-xl border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
             <button
               onClick={() => toggleCheckin("open")}
               disabled={toggling}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
             >
               فتح التسجيل الذاتي
             </button>
@@ -117,9 +121,12 @@ export default function AttendanceMarkingClient({
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-semibold text-slate-900">تسجيل يدوي</h2>
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            <Icon name="calendarCheck" size={16} className="text-brand-blue" />
+            تسجيل يدوي
+          </h2>
           <div className="flex gap-2 text-xs">
             <span className="self-center text-slate-500">تعليم الكل:</span>
             {statusOptions.map((opt) => (
@@ -138,7 +145,7 @@ export default function AttendanceMarkingClient({
           {rows.map((row) => (
             <div
               key={row.student.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 p-3"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-panel/40 p-3"
             >
               <span className="font-medium text-slate-900">{row.student.fullName}</span>
               <div className="flex gap-1.5">

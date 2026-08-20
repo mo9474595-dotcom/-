@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useUI } from "@/components/ui/UIProvider";
+import Icon from "@/components/brand/Icon";
 
 export default function PortalLinkBox({
   studentId,
@@ -53,29 +54,33 @@ export default function PortalLinkBox({
   }
 
   return (
-    <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-      <h2 className="font-semibold text-blue-900">رابط بوابة الطالب</h2>
-      <p className="mt-1 text-xs text-blue-700">
-        رابط دائم وشخصي يتيح للطالب رؤية درجاته وحضوره وترتيبه، والدخول المباشر لامتحاناته
-        المتاحة دون كلمة مرور.
+    <div className="rounded-2xl bg-brand-panel p-5">
+      <h2 className="flex items-center gap-2 font-semibold text-brand-navy-dark">
+        رابط بوابة الطالب
+        <Icon name="globe" size={16} />
+      </h2>
+      <p className="mt-1 text-xs text-slate-600">
+        رابط خاص يمنح الطالب رؤية درجاته وواجباته ونتائجه من خلال بوابة الطالب.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <code className="rounded-lg bg-white px-3 py-2 text-xs text-slate-700 break-all">{url}</code>
         <button
           onClick={copy}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+          className="flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-navy"
         >
-          {copied ? "تم النسخ ✓" : "نسخ الرابط"}
+          <Icon name="clipboard" size={14} />
+          {copied ? "تم النسخ" : "نسخ الرابط"}
         </button>
         <button
           onClick={regenerate}
           disabled={loading}
-          className="rounded-lg border border-blue-300 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
         >
-          {loading ? "..." : "إبطال الرابط وتوليد رابط جديد"}
+          <Icon name="clockHistory" size={14} />
+          {loading ? "..." : "توليد رابط جديد"}
         </button>
+        <code className="flex-1 rounded-xl bg-white px-3 py-2 text-xs text-slate-700 break-all">{url}</code>
       </div>
-      <p className="mt-3 text-xs text-blue-700">
+      <p className="mt-3 text-xs text-slate-600">
         {stats.accessCount === 0
           ? "لم يُفتح هذا الرابط بعد."
           : `فُتح ${stats.accessCount} مرة${

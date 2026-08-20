@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Icon from "@/components/brand/Icon";
 
 export default function NewExamPage() {
   const router = useRouter();
@@ -39,15 +40,17 @@ export default function NewExamPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="text-2xl font-bold text-slate-900">امتحان جديد</h1>
+      <h1 className="text-2xl font-bold text-brand-navy-dark">امتحان جديد</h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6">
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-slate-700">عنوان الامتحان</label>
           <input
             name="title"
             required
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            placeholder="اكتب عنوان الامتحان"
+            className="rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
@@ -56,46 +59,63 @@ export default function NewExamPage() {
           <textarea
             name="description"
             rows={3}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            placeholder="اكتب وصفاً مختصراً عن الامتحان..."
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-slate-700">المدة (بالدقائق)</label>
-            <input
-              name="durationMinutes"
-              type="number"
-              min={1}
-              max={600}
-              defaultValue={30}
-              required
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
+            <div className="relative">
+              <input
+                name="durationMinutes"
+                type="number"
+                min={1}
+                max={600}
+                defaultValue={30}
+                required
+                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 pl-9 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <Icon name="clock" size={16} />
+              </span>
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-slate-700">
               الحد الأقصى لمحاولات الخروج من الصفحة
             </label>
-            <input
-              name="maxTabViolations"
-              type="number"
-              min={0}
-              max={20}
-              defaultValue={3}
-              required
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
+            <div className="relative">
+              <input
+                name="maxTabViolations"
+                type="number"
+                min={0}
+                max={20}
+                defaultValue={3}
+                required
+                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 pl-9 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <Icon name="shield" size={16} />
+              </span>
+            </div>
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="shuffleQuestions" defaultChecked className="rounded" />
-          ترتيب عشوائي للأسئلة لكل طالب
+        <label className="flex items-start gap-2 text-sm text-slate-700">
+          <input type="checkbox" name="shuffleQuestions" defaultChecked className="mt-0.5 h-4 w-4 rounded accent-brand-blue" />
+          <span>
+            ترتيب عشوائي للأسئلة لكل طالب
+            <span className="block text-xs text-slate-400">يتم ترتيب الأسئلة بشكل مختلف لكل طالب</span>
+          </span>
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="shuffleChoices" defaultChecked className="rounded" />
-          ترتيب عشوائي للخيارات لكل طالب
+        <label className="flex items-start gap-2 text-sm text-slate-700">
+          <input type="checkbox" name="shuffleChoices" defaultChecked className="mt-0.5 h-4 w-4 rounded accent-brand-blue" />
+          <span>
+            ترتيب عشوائي للخيارات داخل الطلب
+            <span className="block text-xs text-slate-400">يتم ترتيب خيارات الإجابة بشكل مختلف لكل طالب</span>
+          </span>
         </label>
 
         {error && (
@@ -105,8 +125,9 @@ export default function NewExamPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="mt-2 flex items-center justify-center gap-2 rounded-full bg-brand-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
+          <span>+</span>
           {loading ? "جارٍ الإنشاء..." : "إنشاء الامتحان"}
         </button>
       </form>

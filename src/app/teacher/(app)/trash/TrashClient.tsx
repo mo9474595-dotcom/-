@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUI } from "@/components/ui/UIProvider";
+import Icon from "@/components/brand/Icon";
 
 type TrashedClass = { id: string; name: string; deletedAt: Date | null };
 type TrashedExam = { id: string; title: string; deletedAt: Date | null };
@@ -35,8 +36,11 @@ export default function TrashClient({
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">الشعب المحذوفة</h2>
+      <section className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="users" size={17} className="text-brand-blue" />
+          الشعب المحذوفة
+        </h2>
         {classes.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">لا توجد شعب محذوفة.</p>
         ) : (
@@ -52,8 +56,9 @@ export default function TrashClient({
                 <button
                   onClick={() => restore("classes", c.id, c.name)}
                   disabled={restoringId === c.id}
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
                 >
+                  <Icon name="clockHistory" size={14} />
                   استعادة
                 </button>
               </li>
@@ -62,8 +67,11 @@ export default function TrashClient({
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-slate-900">الامتحانات المحذوفة</h2>
+      <section className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <Icon name="clipboard" size={17} className="text-brand-blue" />
+          الامتحانات المحذوفة
+        </h2>
         {exams.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">لا توجد امتحانات محذوفة.</p>
         ) : (
@@ -79,8 +87,9 @@ export default function TrashClient({
                 <button
                   onClick={() => restore("exams", e.id, e.title)}
                   disabled={restoringId === e.id}
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
                 >
+                  <Icon name="clockHistory" size={14} />
                   استعادة
                 </button>
               </li>

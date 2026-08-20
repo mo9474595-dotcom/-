@@ -3,6 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getTeacherIdFromSession } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import TeacherNav from "@/components/TeacherNav";
+import AppHeader from "@/components/brand/AppHeader";
+import Icon from "@/components/brand/Icon";
 
 export default async function TeacherAppLayout({
   children,
@@ -23,7 +26,8 @@ export default async function TeacherAppLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-1 flex-col bg-brand-page-tint">
+      <AppHeader title="لوحة تحكم الأستاذ" icon={<Icon name="home" size={18} />} />
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3">
@@ -31,27 +35,17 @@ export default async function TeacherAppLayout({
               لوحة تحكم الأستاذ
             </Link>
             <div className="flex items-center gap-3 sm:gap-4">
-              <span className="hidden text-sm text-slate-600 sm:inline">{teacher.name}</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500">
+                <Icon name="bell" size={18} />
+              </span>
+              <div className="hidden text-right sm:block">
+                <p className="text-sm font-semibold text-slate-800">{teacher.name}</p>
+                <p className="text-xs text-slate-500">أستاذ تدريسي</p>
+              </div>
               <LogoutButton />
             </div>
           </div>
-          <nav className="mt-2 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm font-medium text-slate-600 sm:mt-1">
-            <Link href="/teacher/dashboard" className="hover:text-blue-600">
-              الامتحانات
-            </Link>
-            <Link href="/teacher/classes" className="hover:text-blue-600">
-              الشعب والطلاب
-            </Link>
-            <Link href="/teacher/audit-log" className="hover:text-blue-600">
-              سجل التعديلات
-            </Link>
-            <Link href="/teacher/trash" className="hover:text-blue-600">
-              سلة المحذوفات
-            </Link>
-            <a href="/api/teacher/export" className="hover:text-blue-600">
-              نسخة احتياطية
-            </a>
-          </nav>
+          <TeacherNav />
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>

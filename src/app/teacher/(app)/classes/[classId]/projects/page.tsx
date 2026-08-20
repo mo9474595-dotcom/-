@@ -22,7 +22,8 @@ export default async function ProjectsPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">مشاريع {classSection.name}</h1>
+      <h1 className="text-2xl font-bold text-brand-navy-dark">مشاريع {classSection.name}</h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
       <ProjectsClient classId={classId} initialProjects={projects} />
     </div>
   );

@@ -28,7 +28,8 @@ export default async function ResultsPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">النتائج — {exam.title}</h1>
+      <h1 className="text-2xl font-bold text-brand-navy-dark">النتائج — {exam.title}</h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
       <ResultsTableClient examId={examId} attempts={attempts} />
     </div>
   );

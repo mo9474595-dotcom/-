@@ -7,6 +7,7 @@ import type { StudentProfile } from "@prisma/client";
 import { useUI } from "@/components/ui/UIProvider";
 import { usePagedSearch } from "@/components/ui/usePagedSearch";
 import PaginationBar from "@/components/ui/PaginationBar";
+import Icon from "@/components/brand/Icon";
 
 export default function RosterManager({
   classId,
@@ -103,8 +104,11 @@ export default function RosterManager({
     );
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="font-semibold text-slate-900">قائمة الطلاب ({students.length})</h2>
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+        <Icon name="users" size={17} className="text-brand-blue" />
+        قائمة الطلاب ({students.length})
+      </h2>
 
       <form onSubmit={handleAdd} className="mt-4 flex flex-col gap-2">
         <label className="text-xs font-medium text-slate-600">
@@ -115,25 +119,30 @@ export default function RosterManager({
           onChange={(e) => setNamesText(e.target.value)}
           rows={3}
           placeholder={"أحمد محمد, 1023\nسارة علي"}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
         />
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="self-start rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="flex items-center gap-1.5 self-start rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
         >
           {loading ? "جارٍ الإضافة..." : "إضافة"}
         </button>
       </form>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="ابحث بالاسم أو الرقم الجامعي..."
-          className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        />
+        <div className="relative w-full max-w-xs">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحث بالاسم أو الرقم الجامعي..."
+            className="w-full rounded-xl border border-slate-300 px-3 py-2 pl-9 text-sm"
+          />
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <Icon name="search" size={16} />
+          </span>
+        </div>
       </div>
 
       <div className="mt-2 overflow-x-auto rounded-xl border border-slate-200">
@@ -151,7 +160,7 @@ export default function RosterManager({
                 <td className="px-3 py-2">
                   <Link
                     href={`/teacher/classes/${classId}/students/${s.id}`}
-                    className="font-medium text-blue-600 hover:underline"
+                    className="font-medium text-brand-blue hover:underline"
                   >
                     {s.fullName}
                   </Link>
@@ -161,7 +170,7 @@ export default function RosterManager({
                   <div className="flex gap-3">
                     <button
                       onClick={() => copyPortalLink(s.id, s.portalToken)}
-                      className="text-xs font-medium text-blue-600 hover:underline"
+                      className="text-xs font-medium text-brand-blue hover:underline"
                     >
                       {copiedId === s.id ? "تم النسخ ✓" : "نسخ رابط البوابة"}
                     </button>

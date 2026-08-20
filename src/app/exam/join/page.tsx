@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import AppHeader from "@/components/brand/AppHeader";
+import Icon from "@/components/brand/Icon";
 
 export default function JoinExamPage() {
   const router = useRouter();
@@ -40,53 +42,76 @@ export default function JoinExamPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">الدخول إلى الامتحان</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          أدخل رمز الامتحان الذي أعطاك إياه الأستاذ واسمك الكامل.
-        </p>
+    <div className="flex flex-1 flex-col">
+      <AppHeader title="دخول الطالب للامتحان" icon={<Icon name="graduationCap" size={18} />} />
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">رمز الامتحان</label>
-            <input
-              name="code"
-              required
-              placeholder="XXXX-XXXX-XXXX"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-wider outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">الاسم الكامل</label>
-            <input
-              name="studentName"
-              required
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">
-              الرقم الجامعي / رقم الجلوس (اختياري)
-            </label>
-            <input
-              name="studentRef"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-brand-page-tint px-4 py-16">
+        <div className="brand-dot-grid pointer-events-none absolute right-16 top-16 hidden h-28 w-40 text-brand-blue/20 sm:block" />
+        <div className="brand-ring pointer-events-none absolute -left-16 top-1/3 hidden h-44 w-44 border-emerald-400/40 sm:block" />
+        <div className="brand-ring pointer-events-none absolute -bottom-20 -left-10 hidden h-56 w-56 border-brand-blue/20 sm:block" />
 
-          {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-          )}
+        <div className="relative w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+            <Icon name="shield" size={24} />
+          </div>
+          <h1 className="text-center text-2xl font-bold text-brand-navy-dark">الدخول إلى الامتحان</h1>
+          <p className="mt-1 text-center text-sm text-slate-500">
+            أدخل رمز الامتحان الذي أعطاك إياه الأستاذ واسمك الكامل للشروع بالامتحان.
+          </p>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-          >
-            {loading ? "جارٍ الدخول..." : "التالي"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                رمز الامتحان
+                <Icon name="key" size={14} className="text-brand-blue" />
+              </label>
+              <input
+                name="code"
+                required
+                placeholder="XXXX-XXXX-XXXX"
+                className="rounded-xl border border-slate-300 px-3 py-2.5 text-center font-mono text-lg tracking-wider outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                الاسم الكامل
+                <Icon name="user" size={14} className="text-brand-blue" />
+              </label>
+              <input
+                name="studentName"
+                required
+                className="rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                الرقم الجامعي / رقم الجلوس (اختياري)
+              </label>
+              <input
+                name="studentRef"
+                className="rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 flex items-center justify-center gap-2 rounded-full bg-brand-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
+            >
+              {loading ? "جارٍ الدخول..." : "التالي"}
+              <span>←</span>
+            </button>
+          </form>
+
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
+            <Icon name="lock" size={12} />
+            بياناتك آمنة وتُستخدم لأغراض الامتحان فقط
+          </p>
+        </div>
       </div>
     </div>
   );

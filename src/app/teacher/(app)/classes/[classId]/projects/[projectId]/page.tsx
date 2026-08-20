@@ -31,8 +31,9 @@ export default async function ProjectGradingPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">تصحيح: {project.title}</h1>
-      <p className="mt-1 text-sm text-slate-500">الدرجة القصوى: {project.maxScore}</p>
+      <h1 className="text-2xl font-bold text-brand-navy-dark">تصحيح: {project.title}</h1>
+      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
+      <p className="mt-2 text-sm text-slate-500">الدرجة القصوى: {project.maxScore}</p>
       <ProjectGradingClient projectId={projectId} maxScore={project.maxScore} initialRows={rows} />
     </div>
   );

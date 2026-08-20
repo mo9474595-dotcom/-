@@ -150,7 +150,7 @@ test("logout from all devices invalidates a previously-issued session cookie", a
   const sessionCookie = cookiesBefore.find((c) => c.name === "teacher_token")!;
   expect(sessionCookie).toBeTruthy();
 
-  await page.click('button:has-text("من كل الأجهزة")');
+  await page.click('button:has-text("من خلال الأجهزة")');
   await page.getByRole("button", { name: "تسجيل الخروج من الكل", exact: true }).click();
   await page.waitForURL(/\/teacher\/login$/);
 
