@@ -58,7 +58,9 @@ export default function Home() {
               href="/exam/join"
               className="group flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md"
             >
-              <span className="text-4xl">🎓</span>
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+                <Icon name="graduationCap" size={32} />
+              </span>
               <span className="text-xl font-bold text-slate-900">أنا طالب</span>
               <span className="text-sm text-slate-500">الدخول إلى الامتحان عبر الجدول</span>
               <span className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-brand-blue py-3 text-sm font-semibold text-white transition group-hover:bg-brand-navy">
@@ -70,7 +72,9 @@ export default function Home() {
               href="/teacher/login"
               className="group flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md"
             >
-              <span className="text-4xl">🧑‍🏫</span>
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-panel text-brand-green">
+                <Icon name="teacher" size={32} />
+              </span>
               <span className="text-xl font-bold text-slate-900">أنا أستاذ</span>
               <span className="text-sm text-slate-500">إدارة المحتوى والأسئلة والنتائج</span>
               <span className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-sm font-semibold text-white transition group-hover:bg-brand-green-dark">
@@ -91,6 +95,23 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 grid items-center gap-6 rounded-2xl bg-white p-6 text-right shadow-sm sm:grid-cols-2 sm:p-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/photos/student-library.jpg"
+              alt="طالب يدرس بتركيز"
+              className="h-64 w-full rounded-xl object-cover sm:h-80"
+            />
+            <div>
+              <h2 className="text-xl font-bold text-brand-navy-dark">منصة مبنية لخدمة التعليم</h2>
+              <div className="mt-1 h-1 w-14 rounded-full bg-brand-green" />
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                نوفّر بيئة امتحانات إلكترونية آمنة وسهلة الاستخدام، تدعم الأساتذة في إدارة محتواهم
+                التعليمي، وتمنح الطلاب تجربة اختبار واضحة وموثوقة من البداية إلى النتيجة.
+              </p>
+            </div>
           </div>
         </div>
       </div>
