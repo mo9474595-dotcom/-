@@ -31,8 +31,17 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   }
 }
 
+const nullableDateTime = z
+  .string()
+  .trim()
+  .optional()
+  .nullable()
+  .transform((v) => (v ? new Date(v) : null));
+
 const updateSchema = examSchema.partial().extend({
   isPublished: z.coerce.boolean().optional(),
+  opensAt: nullableDateTime.optional(),
+  closesAt: nullableDateTime.optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
@@ -50,9 +59,21 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const { opensAt, closesAt, ...rest } = parsed.data;
+    if (opensAt && closesAt && opensAt >= closesAt) {
+      return NextResponse.json(
+        { error: "وقت الفتح يجب أن يكون قبل وقت الإغلاق" },
+        { status: 400 }
+      );
+    }
+
     const exam = await prisma.exam.update({
       where: { id: examId },
-      data: parsed.data,
+      data: {
+        ...rest,
+        ...(opensAt !== undefined ? { opensAt } : {}),
+        ...(closesAt !== undefined ? { closesAt } : {}),
+      },
     });
 
     return NextResponse.json({ exam });

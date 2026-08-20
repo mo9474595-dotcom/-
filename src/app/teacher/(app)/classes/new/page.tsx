@@ -2,9 +2,11 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useUI } from "@/components/ui/UIProvider";
 
 export default function NewClassPage() {
   const router = useRouter();
+  const { confirm } = useUI();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,12 +24,31 @@ export default function NewClassPage() {
       attendanceWeight: formData.get("attendanceWeight"),
     };
 
-    const res = await fetch("/api/teacher/classes", {
+    let res = await fetch("/api/teacher/classes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    let data = await res.json();
+
+    if (!res.ok && data.code === "DUPLICATE_NAME") {
+      const proceed = await confirm({
+        title: "اسم مكرر",
+        body: `${data.error}. هل تريد إنشاء شعبة أخرى بنفس الاسم على أي حال؟`,
+        confirmLabel: "إنشاء على أي حال",
+      });
+      if (!proceed) {
+        setLoading(false);
+        return;
+      }
+      res = await fetch("/api/teacher/classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, force: true }),
+      });
+      data = await res.json();
+    }
+
     if (!res.ok) {
       setError(data.error ?? "حدث خطأ ما");
       setLoading(false);

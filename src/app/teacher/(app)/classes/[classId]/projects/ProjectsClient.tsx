@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Project } from "@prisma/client";
+import { useUI } from "@/components/ui/UIProvider";
 
 type ProjectWithGrades = Project & { grades: { score: number | null }[] };
 
@@ -15,6 +16,7 @@ export default function ProjectsClient({
   initialProjects: ProjectWithGrades[];
 }) {
   const router = useRouter();
+  const { confirm, toast } = useUI();
   const [projects, setProjects] = useState(initialProjects);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,13 +48,21 @@ export default function ProjectsClient({
     }
     setProjects((prev) => [{ ...data.project, grades: [] }, ...prev]);
     setShowForm(false);
+    toast("تم إنشاء المشروع", "success");
     router.refresh();
   }
 
   async function handleDelete(projectId: string) {
-    if (!confirm("هل تريد حذف هذا المشروع وكل درجاته؟")) return;
+    const ok = await confirm({
+      title: "حذف المشروع؟",
+      body: "سيُحذف المشروع وكل درجات الطلاب فيه نهائياً.",
+      confirmLabel: "حذف",
+      danger: true,
+    });
+    if (!ok) return;
     await fetch(`/api/teacher/projects/${projectId}`, { method: "DELETE" });
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    toast("تم حذف المشروع", "success");
     router.refresh();
   }
 

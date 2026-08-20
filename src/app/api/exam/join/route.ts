@@ -4,8 +4,12 @@ import { handleApiError } from "@/lib/api-utils";
 import { joinExamSchema } from "@/lib/validation";
 import { generateSessionToken, setExamSessionCookie, getExamSessionToken } from "@/lib/exam-session";
 import { shuffle } from "@/lib/shuffle";
+import { rateLimitOrResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimitOrResponse(req, "exam-join", 20, 60_000);
+  if (limited) return limited;
+
   try {
     const body = await req.json().catch(() => null);
     const parsed = joinExamSchema.safeParse(body);
@@ -59,6 +63,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "تم استخدام هذا الرمز بالفعل ولا يمكن إعادة الدخول" },
         { status: 409 }
+      );
+    }
+
+    const now0 = new Date();
+    if (examCode.exam.opensAt && now0 < examCode.exam.opensAt) {
+      return NextResponse.json(
+        {
+          error: `لم يبدأ الامتحان بعد، سيُفتح في ${examCode.exam.opensAt.toLocaleString("ar")}`,
+        },
+        { status: 403 }
+      );
+    }
+    if (examCode.exam.closesAt && now0 > examCode.exam.closesAt) {
+      return NextResponse.json(
+        { error: "انتهت فترة الدخول المسموحة لهذا الامتحان" },
+        { status: 403 }
       );
     }
 

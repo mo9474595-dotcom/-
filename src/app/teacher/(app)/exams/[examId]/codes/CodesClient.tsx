@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ExamCode, ExamAttempt } from "@prisma/client";
 import ScoreFraction from "@/components/ScoreFraction";
+import { usePagedSearch } from "@/components/ui/usePagedSearch";
+import PaginationBar from "@/components/ui/PaginationBar";
 
 type CodeRow = ExamCode & {
   attempt: Pick<ExamAttempt, "status" | "score" | "maxScore"> | null;
@@ -71,6 +73,9 @@ export default function CodesClient({
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 1500);
   }
+
+  const { query, setQuery, page, setPage, pageCount, pageItems, totalCount, pageSize } =
+    usePagedSearch(codes, (c, q) => c.code.toLowerCase().includes(q) || (c.studentName ?? "").toLowerCase().includes(q));
 
   return (
     <div className="mt-6 flex flex-col gap-6">
@@ -142,6 +147,16 @@ export default function CodesClient({
         </button>
       </form>
 
+      <div className="flex items-center justify-between gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="ابحث بالرمز أو اسم الطالب..."
+          className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+        <span className="shrink-0 text-xs text-slate-500">{codes.length} رمز إجمالاً</span>
+      </div>
+
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead>
@@ -154,7 +169,7 @@ export default function CodesClient({
             </tr>
           </thead>
           <tbody>
-            {codes.map((c) => {
+            {pageItems.map((c) => {
               const status = c.attempt ? statusLabels[c.attempt.status] : null;
               return (
                 <tr key={c.id} className="border-b border-slate-100 last:border-0">
@@ -185,15 +200,22 @@ export default function CodesClient({
                 </tr>
               );
             })}
-            {codes.length === 0 && (
+            {pageItems.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                  لا توجد رموز بعد.
+                  {codes.length === 0 ? "لا توجد رموز بعد." : "لا توجد نتائج مطابقة."}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        <PaginationBar
+          page={page}
+          pageCount={pageCount}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

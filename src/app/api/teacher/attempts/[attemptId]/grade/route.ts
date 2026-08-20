@@ -4,6 +4,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedAttempt } from "@/lib/exams";
 import { recomputeAttemptScore } from "@/lib/grading";
+import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 
 type RouteParams = { params: Promise<{ attemptId: string }> };
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const teacherId = await requireTeacherId();
     const { attemptId } = await params;
-    await getOwnedAttempt(teacherId, attemptId);
+    const attempt = await getOwnedAttempt(teacherId, attemptId);
 
     const body = await req.json().catch(() => null);
     const parsed = gradeSchema.safeParse(body);
@@ -44,6 +45,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     });
 
     const score = await recomputeAttemptScore(attemptId);
+
+    await logAudit({
+      teacherId,
+      action: "ATTEMPT_ANSWER_GRADE_SET",
+      summary: `صحّح إجابة (${capped}/${answer.question.points}) لـ${attempt.studentName} في "${attempt.exam.title}"`,
+      examId: attempt.examId,
+    });
 
     return NextResponse.json({ score });
   } catch (err) {

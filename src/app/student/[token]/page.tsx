@@ -37,6 +37,15 @@ export default async function StudentPortalPage({
   });
   if (!student) notFound();
 
+  // Fire-and-forget usage tracking so the teacher can notice if a link is
+  // being accessed unusually often (a sign it may have been shared around).
+  prisma.studentProfile
+    .update({
+      where: { id: student.id },
+      data: { portalAccessCount: { increment: 1 }, portalLastAccessAt: new Date() },
+    })
+    .catch(() => {});
+
   const ranking = await computeClassRanking(student.classSectionId);
   const position = ranking.findIndex((r) => r.studentId === student.id);
   const breakdown = position >= 0 ? ranking[position] : null;

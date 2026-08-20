@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useExamLockdown } from "@/components/useExamLockdown";
+import { useUI } from "@/components/ui/UIProvider";
 import type { ApiQuestion, ExamStateResponse } from "@/lib/exam-client-types";
 
 type Phase = "intro" | "loading" | "active" | "submitting" | "done" | "error";
@@ -21,6 +22,7 @@ function formatTime(ms: number) {
 export default function ExamPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const router = useRouter();
+  const { confirm } = useUI();
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -32,6 +34,12 @@ export default function ExamPage() {
   const [index, setIndex] = useState(0);
 
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Debounced saves that haven't fired yet, keyed by question id — flushed
+  // immediately before submit so a fast "select answer, then submit" click
+  // sequence (very plausible on a single- or last-question exam) can't lose
+  // the last answer to the 500ms debounce window.
+  const pendingSaves = useRef<Record<string, () => Promise<void>>>({});
+  const inFlightSaves = useRef<Set<Promise<void>>>(new Set());
 
   const handleTerminated = useCallback(() => {
     setPhase("done");
@@ -76,12 +84,22 @@ export default function ExamPage() {
     await loadState();
   }
 
+  const flushPendingSaves = useCallback(async () => {
+    for (const timer of Object.values(saveTimers.current)) clearTimeout(timer);
+    saveTimers.current = {};
+    const fns = Object.values(pendingSaves.current);
+    pendingSaves.current = {};
+    await Promise.all(fns.map((fn) => fn()));
+    await Promise.all(Array.from(inFlightSaves.current));
+  }, []);
+
   const submit = useCallback(async () => {
     setPhase("submitting");
+    await flushPendingSaves();
     await fetch(`/api/exam/${attemptId}/submit`, { method: "POST" });
     setPhase("done");
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-  }, [attemptId]);
+  }, [attemptId, flushPendingSaves]);
 
   // Countdown ticker; server is authoritative, this is just the display.
   useEffect(() => {
@@ -102,14 +120,25 @@ export default function ExamPage() {
     if (phase === "done") router.replace(`/exam/${attemptId}/submitted`);
   }, [phase, attemptId, router]);
 
+  function doSave(questionId: string, answer: LocalAnswer): Promise<void> {
+    const p = fetch(`/api/exam/${attemptId}/answer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questionId, ...answer }),
+    })
+      .catch(() => {})
+      .then(() => {});
+    inFlightSaves.current.add(p);
+    p.finally(() => inFlightSaves.current.delete(p));
+    return p;
+  }
+
   function scheduleSave(questionId: string, answer: LocalAnswer) {
     if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
+    pendingSaves.current[questionId] = () => doSave(questionId, answer);
     saveTimers.current[questionId] = setTimeout(() => {
-      fetch(`/api/exam/${attemptId}/answer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, ...answer }),
-      }).catch(() => {});
+      delete pendingSaves.current[questionId];
+      doSave(questionId, answer);
     }, 500);
   }
 
@@ -278,10 +307,14 @@ export default function ExamPage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    if (confirm("هل أنت متأكد من تسليم الامتحان؟ لا يمكن التراجع بعد ذلك.")) {
-                      submit();
-                    }
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "تسليم الامتحان؟",
+                      body: "لا يمكن التراجع عن هذا الإجراء بعد تسليم الامتحان.",
+                      confirmLabel: "تسليم",
+                      danger: true,
+                    });
+                    if (ok) submit();
                   }}
                   className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
                 >

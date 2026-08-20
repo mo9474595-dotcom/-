@@ -1,15 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useUI } from "@/components/ui/UIProvider";
 
 export default function PortalLinkBox({
   studentId,
   initialToken,
+  accessCount,
+  lastAccessAt,
 }: {
   studentId: string;
   initialToken: string;
+  accessCount: number;
+  lastAccessAt: Date | null;
 }) {
+  const { confirm, toast } = useUI();
   const [token, setToken] = useState(initialToken);
+  const [stats, setStats] = useState({ accessCount, lastAccessAt });
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -23,14 +30,26 @@ export default function PortalLinkBox({
   }
 
   async function regenerate() {
-    if (!confirm("سيتوقف الرابط الحالي عن العمل فوراً. هل تريد المتابعة؟")) return;
+    const ok = await confirm({
+      title: "إبطال الرابط الحالي؟",
+      body: "سيتوقف الرابط الحالي عن العمل فوراً ولن يعمل بعدها لأي شخص يملكه.",
+      confirmLabel: "إبطال وتوليد رابط جديد",
+      danger: true,
+    });
+    if (!ok) return;
     setLoading(true);
     const res = await fetch(`/api/teacher/students/${studentId}/portal-link`, {
       method: "POST",
     });
     const data = await res.json();
     setLoading(false);
-    if (res.ok) setToken(data.portalToken);
+    if (res.ok) {
+      setToken(data.portalToken);
+      setStats({ accessCount: 0, lastAccessAt: null });
+      toast("تم إبطال الرابط القديم وتوليد رابط جديد", "success");
+    } else {
+      toast(data.error ?? "تعذر توليد رابط جديد", "error");
+    }
   }
 
   return (
@@ -56,6 +75,16 @@ export default function PortalLinkBox({
           {loading ? "..." : "إبطال الرابط وتوليد رابط جديد"}
         </button>
       </div>
+      <p className="mt-3 text-xs text-blue-700">
+        {stats.accessCount === 0
+          ? "لم يُفتح هذا الرابط بعد."
+          : `فُتح ${stats.accessCount} مرة${
+              stats.lastAccessAt
+                ? ` · آخر فتح: ${new Date(stats.lastAccessAt).toLocaleString("ar")}`
+                : ""
+            }`}
+        {" — "}عدد فتحات مرتفع بشكل غير متوقع قد يعني أن الرابط انتشر خارج الطالب.
+      </p>
     </div>
   );
 }

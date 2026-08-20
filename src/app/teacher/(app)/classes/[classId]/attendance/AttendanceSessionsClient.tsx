@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AttendanceSession } from "@prisma/client";
+import { useUI } from "@/components/ui/UIProvider";
 
 type SessionWithRecords = AttendanceSession & { records: { status: string }[] };
 
@@ -15,6 +16,7 @@ export default function AttendanceSessionsClient({
   initialSessions: SessionWithRecords[];
 }) {
   const router = useRouter();
+  const { confirm, toast } = useUI();
   const [sessions, setSessions] = useState(initialSessions);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -33,14 +35,22 @@ export default function AttendanceSessionsClient({
     if (res.ok) {
       setSessions((prev) => [{ ...data.session, records: [] }, ...prev]);
       setTitle("");
+      toast("تم إنشاء جلسة الحضور", "success");
       router.refresh();
     }
   }
 
   async function handleDelete(sessionId: string) {
-    if (!confirm("هل تريد حذف جلسة الحضور هذه؟")) return;
+    const ok = await confirm({
+      title: "حذف جلسة الحضور؟",
+      body: "سيُحذف سجل حضور جميع الطلاب لهذه الجلسة نهائياً.",
+      confirmLabel: "حذف",
+      danger: true,
+    });
+    if (!ok) return;
     await fetch(`/api/teacher/attendance/${sessionId}`, { method: "DELETE" });
     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    toast("تم حذف الجلسة", "success");
     router.refresh();
   }
 

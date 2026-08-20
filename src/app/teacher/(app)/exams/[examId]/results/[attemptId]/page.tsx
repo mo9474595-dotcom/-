@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import GradeClient from "./GradeClient";
+import ResetAttemptButton from "./ResetAttemptButton";
 import ScoreFraction from "@/components/ScoreFraction";
 
 const cheatLabels: Record<string, string> = {
@@ -51,11 +52,14 @@ export default async function AttemptDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">{attempt.studentName}</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {exam.title} · الدرجة: <ScoreFraction score={attempt.score} max={attempt.maxScore} />
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{attempt.studentName}</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {exam.title} · الدرجة: <ScoreFraction score={attempt.score} max={attempt.maxScore} />
+          </p>
+        </div>
+        <ResetAttemptButton examId={examId} attemptId={attemptId} studentName={attempt.studentName} />
       </div>
 
       {cheatLogs.length > 0 && (

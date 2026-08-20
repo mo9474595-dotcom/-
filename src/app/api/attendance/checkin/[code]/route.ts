@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimitOrResponse } from "@/lib/rate-limit";
 
 type RouteParams = { params: Promise<{ code: string }> };
 
-export async function GET(_req: NextRequest, { params }: RouteParams) {
+export async function GET(req: NextRequest, { params }: RouteParams) {
+  const limited = rateLimitOrResponse(req, "attendance-checkin-lookup", 20, 60_000);
+  if (limited) return limited;
+
   const { code } = await params;
 
   const session = await prisma.attendanceSession.findUnique({

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { selfCheckinSchema } from "@/lib/validation";
+import { rateLimitOrResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimitOrResponse(req, "attendance-checkin", 15, 60_000);
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const parsed = selfCheckinSchema.safeParse(body);
   if (!parsed.success) {

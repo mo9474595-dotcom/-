@@ -51,6 +51,27 @@ model Teacher {
 
   exams         Exam[]
   classSections ClassSection[]
+  auditLogs     AuditLog[]
+}
+
+// A record of a sensitive manual action a teacher took, for accountability
+// (e.g. overriding a grade, resetting a stuck exam attempt). Kept even if
+// the entity it refers to is later deleted.
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String // short machine key, e.g. "MANUAL_GRADE_SET"
+  summary   String // human-readable Arabic one-liner, ready to display
+  createdAt DateTime @default(now())
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  classSectionId String?
+  examId         String?
+
+  @@index([teacherId, createdAt])
+  @@index([classSectionId])
+  @@index([examId])
 }
 
 // A roster (شعبة/فصل) the teacher manages. Grades, projects and attendance
@@ -91,7 +112,9 @@ model StudentProfile {
 
   // Bearer token for the student's personal portal link — no password, no
   // account. Regeneratable by the teacher if a link leaks.
-  portalToken String @unique @default(cuid())
+  portalToken        String    @unique @default(cuid())
+  portalAccessCount  Int       @default(0)
+  portalLastAccessAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -189,16 +212,21 @@ model AttendanceRecord {
 }
 
 model Exam {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   title            String
   description      String?
   durationMinutes  Int
-  shuffleQuestions Boolean  @default(true)
-  shuffleChoices   Boolean  @default(true)
-  maxTabViolations Int      @default(3)
-  isPublished      Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  shuffleQuestions Boolean   @default(true)
+  shuffleChoices   Boolean   @default(true)
+  maxTabViolations Int       @default(3)
+  isPublished      Boolean   @default(false)
+  // Optional availability window on top of isPublished. Null means "no
+  // restriction on that side" — e.g. opensAt set with closesAt null stays
+  // open indefinitely once it opens.
+  opensAt          DateTime?
+  closesAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   teacherId String
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)

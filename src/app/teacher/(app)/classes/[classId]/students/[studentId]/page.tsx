@@ -69,7 +69,12 @@ export default async function StudentDetailPage({
         )}
       </div>
 
-      <PortalLinkBox studentId={student.id} initialToken={student.portalToken} />
+      <PortalLinkBox
+        studentId={student.id}
+        initialToken={student.portalToken}
+        accessCount={student.portalAccessCount}
+        lastAccessAt={student.portalLastAccessAt}
+      />
 
       {breakdown && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">

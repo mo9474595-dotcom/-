@@ -16,7 +16,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
 
     const student = await prisma.studentProfile.update({
       where: { id: studentId },
-      data: { portalToken: nanoid(24) },
+      data: { portalToken: nanoid(24), portalAccessCount: 0, portalLastAccessAt: null },
       select: { portalToken: true },
     });
 

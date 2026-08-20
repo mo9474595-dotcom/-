@@ -4,6 +4,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedStudent } from "@/lib/exams";
 import { manualGradeSchema } from "@/lib/validation";
+import { logAudit } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ studentId: string }> };
 
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const teacherId = await requireTeacherId();
     const { studentId } = await params;
-    await getOwnedStudent(teacherId, studentId);
+    const student = await getOwnedStudent(teacherId, studentId);
 
     const body = await req.json().catch(() => null);
     const parsed = manualGradeSchema.safeParse(body);
@@ -30,6 +31,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         maxScore: parsed.data.maxScore,
         notes: parsed.data.notes || null,
       },
+    });
+
+    await logAudit({
+      teacherId,
+      action: "MANUAL_GRADE_SET",
+      summary: `أضاف درجة "${grade.title}" (${grade.score}/${grade.maxScore}) لـ${student.fullName}`,
+      classSectionId: student.classSectionId,
     });
 
     return NextResponse.json({ grade }, { status: 201 });

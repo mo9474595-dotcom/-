@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Exam, Question, Choice } from "@prisma/client";
 import QuestionForm, { QuestionFormValue } from "@/components/QuestionForm";
+import { useUI } from "@/components/ui/UIProvider";
+import ExamScheduleEditor from "./ExamScheduleEditor";
 
 type QuestionWithChoices = Question & { choices: Choice[] };
 type ExamWithQuestions = Exam & { questions: QuestionWithChoices[] };
@@ -16,6 +18,7 @@ const typeLabels: Record<string, string> = {
 
 export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) {
   const router = useRouter();
+  const { confirm, toast } = useUI();
   const [isPublished, setIsPublished] = useState(exam.isPublished);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -37,6 +40,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
     setPublishing(false);
     if (res.ok) {
       setIsPublished(!isPublished);
+      toast(!isPublished ? "تم نشر الامتحان" : "تم إلغاء نشر الامتحان", "success");
       router.refresh();
     } else {
       const data = await res.json().catch(() => null);
@@ -55,6 +59,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
       return data?.error ?? "تعذر إضافة السؤال";
     }
     setShowAddForm(false);
+    toast("تمت إضافة السؤال", "success");
     router.refresh();
   }
 
@@ -69,12 +74,19 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
       return data?.error ?? "تعذر تعديل السؤال";
     }
     setEditingId(null);
+    toast("تم حفظ التعديلات", "success");
     router.refresh();
   }
 
   async function handleDeleteQuestion(questionId: string) {
-    if (!confirm("هل تريد حذف هذا السؤال؟")) return;
+    const ok = await confirm({
+      title: "حذف السؤال؟",
+      confirmLabel: "حذف",
+      danger: true,
+    });
+    if (!ok) return;
     await fetch(`/api/teacher/questions/${questionId}`, { method: "DELETE" });
+    toast("تم حذف السؤال", "success");
     router.refresh();
   }
 
@@ -104,6 +116,12 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
           </div>
         </div>
       </div>
+
+      <ExamScheduleEditor
+        examId={exam.id}
+        initialOpensAt={exam.opensAt}
+        initialClosesAt={exam.closesAt}
+      />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex items-center justify-between">

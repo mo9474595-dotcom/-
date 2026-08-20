@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { StudentProfile } from "@prisma/client";
+import { useUI } from "@/components/ui/UIProvider";
+import { usePagedSearch } from "@/components/ui/usePagedSearch";
+import PaginationBar from "@/components/ui/PaginationBar";
 
 export default function RosterManager({
   classId,
@@ -13,6 +16,7 @@ export default function RosterManager({
   initialStudents: StudentProfile[];
 }) {
   const router = useRouter();
+  const { confirm, toast } = useUI();
   const [students, setStudents] = useState(initialStudents);
   const [namesText, setNamesText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,6 +50,22 @@ export default function RosterManager({
       return;
     }
 
+    const existingNames = new Set(students.map((s) => s.fullName.trim().toLowerCase()));
+    const duplicates = parsedStudents.filter((s) =>
+      existingNames.has(s.fullName.trim().toLowerCase())
+    );
+    if (duplicates.length > 0) {
+      const ok = await confirm({
+        title: "أسماء مكررة في الشعبة",
+        body: `يوجد بالفعل طالب بنفس الاسم: ${duplicates.map((d) => d.fullName).join("، ")}. سيُضاف كطالب منفصل. هل تريد المتابعة؟`,
+        confirmLabel: "إضافة على أي حال",
+      });
+      if (!ok) {
+        setLoading(false);
+        return;
+      }
+    }
+
     const res = await fetch(`/api/teacher/classes/${classId}/students`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -59,15 +79,28 @@ export default function RosterManager({
     }
     setStudents(data.students);
     setNamesText("");
+    toast(`تمت إضافة ${parsedStudents.length} طالب`, "success");
     router.refresh();
   }
 
-  async function handleDelete(studentId: string) {
-    if (!confirm("هل تريد حذف هذا الطالب؟ سيُحذف كل ما يتعلق به من درجات وحضور.")) return;
+  async function handleDelete(studentId: string, studentName: string) {
+    const ok = await confirm({
+      title: `حذف ${studentName}؟`,
+      body: "سيُحذف كل ما يتعلق بهذا الطالب من درجات وحضور ونتائج امتحانات بشكل نهائي.",
+      confirmLabel: "حذف نهائياً",
+      danger: true,
+    });
+    if (!ok) return;
     await fetch(`/api/teacher/students/${studentId}`, { method: "DELETE" });
     setStudents((prev) => prev.filter((s) => s.id !== studentId));
+    toast("تم حذف الطالب", "success");
     router.refresh();
   }
+
+  const { query, setQuery, page, setPage, pageCount, pageItems, totalCount, pageSize } =
+    usePagedSearch(students, (s, q) =>
+      s.fullName.toLowerCase().includes(q) || (s.studentRef ?? "").toLowerCase().includes(q)
+    );
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -94,7 +127,16 @@ export default function RosterManager({
         </button>
       </form>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="ابحث بالاسم أو الرقم الجامعي..."
+          className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div className="mt-2 overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-right text-slate-500">
@@ -104,7 +146,7 @@ export default function RosterManager({
             </tr>
           </thead>
           <tbody>
-            {students.map((s) => (
+            {pageItems.map((s) => (
               <tr key={s.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-3 py-2">
                   <Link
@@ -124,7 +166,7 @@ export default function RosterManager({
                       {copiedId === s.id ? "تم النسخ ✓" : "نسخ رابط البوابة"}
                     </button>
                     <button
-                      onClick={() => handleDelete(s.id)}
+                      onClick={() => handleDelete(s.id, s.fullName)}
                       className="text-xs font-medium text-red-600 hover:underline"
                     >
                       حذف
@@ -133,15 +175,22 @@ export default function RosterManager({
                 </td>
               </tr>
             ))}
-            {students.length === 0 && (
+            {pageItems.length === 0 && (
               <tr>
                 <td colSpan={3} className="px-3 py-6 text-center text-slate-500">
-                  لا يوجد طلاب بعد.
+                  {students.length === 0 ? "لا يوجد طلاب بعد." : "لا توجد نتائج مطابقة."}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        <PaginationBar
+          page={page}
+          pageCount={pageCount}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, createTeacherSession } from "@/lib/auth";
 import { teacherLoginSchema } from "@/lib/validation";
+import { rateLimitOrResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimitOrResponse(req, "teacher-login", 10, 10 * 60_000);
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const parsed = teacherLoginSchema.safeParse(body);
   if (!parsed.success) {

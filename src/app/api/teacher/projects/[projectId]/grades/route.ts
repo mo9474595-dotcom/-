@@ -4,6 +4,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedProject } from "@/lib/exams";
 import { projectGradeSchema } from "@/lib/validation";
+import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 
 type RouteParams = { params: Promise<{ projectId: string }> };
@@ -82,6 +83,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         feedback: parsed.data.feedback || null,
         gradedAt: score != null ? new Date() : null,
       },
+    });
+
+    await logAudit({
+      teacherId,
+      action: "PROJECT_GRADE_SET",
+      summary: `سجّل درجة مشروع "${project.title}" (${score ?? "بدون درجة"}/${project.maxScore}) لـ${student.fullName}`,
+      classSectionId: project.classSectionId,
     });
 
     return NextResponse.json({ grade });
