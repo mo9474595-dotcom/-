@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ExamCode, ExamAttempt } from "@prisma/client";
+import ScoreFraction from "@/components/ScoreFraction";
 
 type CodeRow = ExamCode & {
   attempt: Pick<ExamAttempt, "status" | "score" | "maxScore"> | null;
@@ -171,7 +172,7 @@ export default function CodesClient({
                     )}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {c.attempt?.score != null ? `${c.attempt.score} / ${c.attempt.maxScore}` : "—"}
+                    <ScoreFraction score={c.attempt?.score} max={c.attempt?.maxScore} />
                   </td>
                   <td className="px-4 py-3">
                     <button

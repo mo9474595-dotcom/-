@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import GradeClient from "./GradeClient";
+import ScoreFraction from "@/components/ScoreFraction";
 
 const cheatLabels: Record<string, string> = {
   TAB_HIDDEN: "غادر التبويب / أخفاه",
@@ -53,7 +54,7 @@ export default async function AttemptDetailPage({
       <div>
         <h1 className="text-2xl font-bold text-slate-900">{attempt.studentName}</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {exam.title} · الدرجة: {attempt.score ?? "—"} / {attempt.maxScore ?? "—"}
+          {exam.title} · الدرجة: <ScoreFraction score={attempt.score} max={attempt.maxScore} />
         </p>
       </div>
 

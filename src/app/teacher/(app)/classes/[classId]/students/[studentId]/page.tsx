@@ -5,6 +5,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { computeClassRanking } from "@/lib/ranking";
 import ManualGradesManager from "./ManualGradesManager";
 import PortalLinkBox from "./PortalLinkBox";
+import ScoreFraction from "@/components/ScoreFraction";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -110,7 +111,7 @@ export default async function StudentDetailPage({
                     {attemptStatusLabels[c.attempt!.status]}
                   </td>
                   <td className="px-3 py-2 text-slate-600">
-                    {c.attempt!.score ?? "—"} / {c.attempt!.maxScore ?? "—"}
+                    <ScoreFraction score={c.attempt!.score} max={c.attempt!.maxScore} />
                   </td>
                 </tr>
               ))}
@@ -138,7 +139,7 @@ export default async function StudentDetailPage({
                 <tr key={g.id} className="border-b border-slate-100 last:border-0">
                   <td className="px-3 py-2">{g.project.title}</td>
                   <td className="px-3 py-2 text-slate-600">
-                    {g.score ?? "—"} / {g.project.maxScore}
+                    <ScoreFraction score={g.score} max={g.project.maxScore} />
                   </td>
                 </tr>
               ))}

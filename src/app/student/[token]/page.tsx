@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { computeClassRanking } from "@/lib/ranking";
 import QuickJoinButton from "@/components/QuickJoinButton";
+import ScoreFraction from "@/components/ScoreFraction";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -109,7 +110,7 @@ export default async function StudentPortalPage({
                 <tr key={c.id} className="border-b border-slate-100 last:border-0">
                   <td className="px-2 py-2">{c.exam.title}</td>
                   <td className="px-2 py-2 text-left text-slate-600">
-                    {c.attempt!.score ?? "—"} / {c.attempt!.maxScore ?? "—"}
+                    <ScoreFraction score={c.attempt!.score} max={c.attempt!.maxScore} />
                   </td>
                 </tr>
               ))}
@@ -129,7 +130,7 @@ export default async function StudentPortalPage({
                 <tr key={g.id} className="border-b border-slate-100 last:border-0">
                   <td className="px-2 py-2">{g.title}</td>
                   <td className="px-2 py-2 text-left text-slate-600">
-                    {g.score} / {g.maxScore}
+                    <ScoreFraction score={g.score} max={g.maxScore} />
                   </td>
                 </tr>
               ))}
@@ -137,7 +138,7 @@ export default async function StudentPortalPage({
                 <tr key={g.id} className="border-b border-slate-100 last:border-0">
                   <td className="px-2 py-2">{g.project.title}</td>
                   <td className="px-2 py-2 text-left text-slate-600">
-                    {g.score ?? "—"} / {g.project.maxScore}
+                    <ScoreFraction score={g.score} max={g.project.maxScore} />
                   </td>
                 </tr>
               ))}

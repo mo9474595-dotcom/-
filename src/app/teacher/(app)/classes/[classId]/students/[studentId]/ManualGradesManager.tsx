@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ManualGrade } from "@prisma/client";
+import ScoreFraction from "@/components/ScoreFraction";
 
 export default function ManualGradesManager({
   studentId,
@@ -123,7 +124,7 @@ export default function ManualGradesManager({
               <tr key={g.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-3 py-2">{g.title}</td>
                 <td className="px-3 py-2 text-slate-600">
-                  {g.score} / {g.maxScore}
+                  <ScoreFraction score={g.score} max={g.maxScore} />
                 </td>
                 <td className="px-3 py-2 text-slate-500">{g.notes || "—"}</td>
                 <td className="px-3 py-2">

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
+import ScoreFraction from "@/components/ScoreFraction";
 
 const statusLabels: Record<string, { label: string; className: string }> = {
   IN_PROGRESS: { label: "قيد الحل", className: "bg-blue-100 text-blue-700" },
@@ -62,7 +63,7 @@ export default async function ResultsPage({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {a.score != null ? `${a.score} / ${a.maxScore}` : "—"}
+                    <ScoreFraction score={a.score} max={a.maxScore} />
                   </td>
                   <td className="px-4 py-3">
                     {a._count.cheatLogs > 0 ? (
