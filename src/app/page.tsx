@@ -13,17 +13,7 @@ export default function Home() {
     <div className="flex flex-1 flex-col">
       {/* Top utility bar */}
       <div className="brand-header-gradient">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-4 text-sm text-white/90">
-            <span className="flex items-center gap-1.5">
-              <Icon name="globe" size={16} />
-              العربية
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Icon name="headset" size={16} />
-              تواصل معنا
-            </span>
-          </div>
+        <div className="mx-auto flex max-w-6xl items-center justify-end px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-white">الموقع الرسمي</p>

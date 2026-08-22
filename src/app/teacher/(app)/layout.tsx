@@ -35,9 +35,6 @@ export default async function TeacherAppLayout({
               لوحة تحكم الأستاذ
             </Link>
             <div className="flex items-center gap-3 sm:gap-4">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500">
-                <Icon name="bell" size={18} />
-              </span>
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold text-slate-800">{teacher.name}</p>
                 <p className="text-xs text-slate-500">أستاذ تدريسي</p>
