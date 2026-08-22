@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { randomBytes, createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 
 const TEACHER_COOKIE = "teacher_token";
@@ -73,6 +74,17 @@ export async function getTeacherIdFromSession(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/** Generates a raw password-reset token and the hash of it to store in the DB. */
+export function generatePasswordResetToken() {
+  const rawToken = randomBytes(32).toString("hex");
+  const tokenHash = hashResetToken(rawToken);
+  return { rawToken, tokenHash };
+}
+
+export function hashResetToken(rawToken: string): string {
+  return createHash("sha256").update(rawToken).digest("hex");
 }
 
 export class UnauthorizedError extends Error {}

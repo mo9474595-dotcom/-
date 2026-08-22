@@ -17,10 +17,17 @@ export default function TeacherLoginPage() {
       ]}
       footer={
         <>
-          لا تملك حساباً؟{" "}
-          <Link href="/teacher/register" className="font-medium text-brand-blue hover:underline">
-            إنشاء حساب جديد
-          </Link>
+          <p>
+            لا تملك حساباً؟{" "}
+            <Link href="/teacher/register" className="font-medium text-brand-blue hover:underline">
+              إنشاء حساب جديد
+            </Link>
+          </p>
+          <p className="mt-1">
+            <Link href="/teacher/forgot-password" className="font-medium text-brand-blue hover:underline">
+              نسيت كلمة المرور؟
+            </Link>
+          </p>
         </>
       }
     />

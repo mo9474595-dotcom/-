@@ -11,6 +11,15 @@ export const teacherLoginSchema = z.object({
   password: z.string().min(1, "كلمة المرور مطلوبة"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("بريد إلكتروني غير صالح"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(10, "رابط غير صالح"),
+  password: z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل"),
+});
+
 export const examSchema = z.object({
   title: z.string().trim().min(3, "عنوان الامتحان قصير جداً").max(200),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
