@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AppHeader from "@/components/brand/AppHeader";
 import Icon from "@/components/brand/Icon";
 
@@ -111,6 +112,12 @@ export default function JoinExamPage() {
             <Icon name="lock" size={12} />
             بياناتك آمنة وتُستخدم لأغراض الامتحان فقط
           </p>
+          <Link
+            href="/exam/device-check"
+            className="mt-2 block text-center text-xs font-medium text-brand-blue hover:underline"
+          >
+            لست متأكداً أن جهازك جاهز؟ جرّب صفحة تجربة الجهاز أولاً
+          </Link>
         </div>
       </div>
     </div>
