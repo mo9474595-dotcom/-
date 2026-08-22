@@ -58,6 +58,24 @@ model Teacher {
   auditLogs           AuditLog[]
   bankQuestions       BankQuestion[]
   passwordResetTokens PasswordResetToken[]
+  notifications       Notification[]
+}
+
+// An in-app notification about something a teacher would want to know
+// about soon (a student submitted, an attempt was cut short by anti-cheat
+// enforcement). Polled by the notification bell in the teacher app shell.
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId, read, createdAt])
 }
 
 // A one-time-use link sent to a teacher's email to let them set a new

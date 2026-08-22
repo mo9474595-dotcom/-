@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getTeacherIdFromSession, isAdminEmail } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import NotificationBell from "@/components/NotificationBell";
 import TeacherNav from "@/components/TeacherNav";
 import AppHeader from "@/components/brand/AppHeader";
 import Icon from "@/components/brand/Icon";
@@ -41,6 +42,7 @@ export default async function TeacherAppLayout({
                 <p className="text-sm font-semibold text-slate-800">{teacher.name}</p>
                 <p className="text-xs text-slate-500">أستاذ تدريسي</p>
               </div>
+              <NotificationBell />
               <LogoutButton />
             </div>
           </div>

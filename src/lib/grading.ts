@@ -21,6 +21,12 @@ export async function recomputeAttemptScore(attemptId: string) {
   });
 }
 
+const FINALIZE_MESSAGES: Record<string, (studentName: string, examTitle: string) => string> = {
+  SUBMITTED: (s, e) => `قام الطالب "${s}" بتسليم امتحان "${e}"`,
+  AUTO_SUBMITTED: (s, e) => `انتهى وقت الطالب "${s}" في امتحان "${e}" وتم التسليم تلقائياً`,
+  TERMINATED: (s, e) => `تم إنهاء محاولة الطالب "${s}" في امتحان "${e}" بسبب مخالفات متكررة`,
+};
+
 /**
  * Ends an in-progress attempt (submitted / auto-submitted / terminated),
  * stamping maxScore and grading whatever was answered. Used on manual
@@ -31,16 +37,30 @@ export async function finalizeAttempt(attemptId: string, status: AttemptStatus) 
     where: { id: attemptId },
   });
 
-  const examQuestions = await prisma.question.findMany({
-    where: { examId: attempt.examId },
-    select: { points: true },
+  const exam = await prisma.exam.findUniqueOrThrow({
+    where: { id: attempt.examId },
+    select: { id: true, title: true, teacherId: true, questions: { select: { points: true } } },
   });
-  const maxScore = examQuestions.reduce((sum, q) => sum + q.points, 0);
+  const maxScore = exam.questions.reduce((sum, q) => sum + q.points, 0);
 
   await prisma.examAttempt.update({
     where: { id: attemptId },
     data: { status, submittedAt: new Date(), maxScore },
   });
 
-  return recomputeAttemptScore(attemptId);
+  const result = await recomputeAttemptScore(attemptId);
+
+  const buildMessage = FINALIZE_MESSAGES[status];
+  if (buildMessage) {
+    await prisma.notification.create({
+      data: {
+        teacherId: exam.teacherId,
+        type: status,
+        message: buildMessage(attempt.studentName, exam.title),
+        link: `/teacher/exams/${exam.id}/results`,
+      },
+    });
+  }
+
+  return result;
 }
