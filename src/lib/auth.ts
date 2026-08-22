@@ -95,3 +95,35 @@ export async function requireTeacherId(): Promise<string> {
   if (!teacherId) throw new UnauthorizedError("غير مصرح لك بالدخول");
   return teacherId;
 }
+
+/**
+ * A teacher is an admin if their email is listed in ADMIN_EMAILS (a
+ * comma-separated env var set only in deploy config, never through the
+ * app itself) — there's no separate admin account type or sign-up path,
+ * just an elevated view over the existing teacher accounts.
+ */
+export function isAdminEmail(email: string): boolean {
+  const list = process.env.ADMIN_EMAILS;
+  if (!list) return false;
+  const normalized = email.trim().toLowerCase();
+  return list
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(normalized);
+}
+
+export class ForbiddenAdminError extends Error {}
+
+/** Returns the authenticated admin's teacher id, or throws. */
+export async function requireAdminId(): Promise<string> {
+  const teacherId = await requireTeacherId();
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { email: true },
+  });
+  if (!teacher || !isAdminEmail(teacher.email)) {
+    throw new ForbiddenAdminError("هذه الصفحة مخصصة للإدارة فقط");
+  }
+  return teacherId;
+}

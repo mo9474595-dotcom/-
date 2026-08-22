@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getTeacherIdFromSession } from "@/lib/auth";
+import { getTeacherIdFromSession, isAdminEmail } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
 import TeacherNav from "@/components/TeacherNav";
 import AppHeader from "@/components/brand/AppHeader";
@@ -19,11 +19,13 @@ export default async function TeacherAppLayout({
 
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: { name: true },
+    select: { name: true, email: true },
   });
   if (!teacher) {
     redirect("/teacher/login");
   }
+
+  const isAdmin = isAdminEmail(teacher.email);
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-brand-page-tint">
@@ -42,7 +44,7 @@ export default async function TeacherAppLayout({
               <LogoutButton />
             </div>
           </div>
-          <TeacherNav />
+          <TeacherNav isAdmin={isAdmin} />
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>

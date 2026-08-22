@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/brand/Icon";
 
-const ITEMS: { href: string; label: string; icon: "clipboard" | "users" | "clockHistory" | "trash" | "folder" | "scale" }[] = [
+type IconName = "clipboard" | "users" | "clockHistory" | "trash" | "folder" | "scale" | "shield";
+
+const ITEMS: { href: string; label: string; icon: IconName }[] = [
   { href: "/teacher/dashboard", label: "الامتحانات", icon: "clipboard" },
   { href: "/teacher/classes", label: "الشعب والطلاب", icon: "users" },
   { href: "/teacher/question-bank", label: "بنك الأسئلة", icon: "folder" },
@@ -13,12 +15,19 @@ const ITEMS: { href: string; label: string; icon: "clipboard" | "users" | "clock
   { href: "/teacher/trash", label: "سلة المحذوفات", icon: "trash" },
 ];
 
-export default function TeacherNav() {
+const ADMIN_ITEM: { href: string; label: string; icon: IconName } = {
+  href: "/teacher/admin",
+  label: "إدارة الأساتذة",
+  icon: "shield",
+};
+
+export default function TeacherNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const items = isAdmin ? [...ITEMS, ADMIN_ITEM] : ITEMS;
 
   return (
     <nav className="mt-3 flex items-center gap-6 overflow-x-auto whitespace-nowrap border-t border-slate-100 pt-3">
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const active = pathname.startsWith(item.href);
         return (
           <Link

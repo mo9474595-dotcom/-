@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { UnauthorizedError } from "@/lib/auth";
+import { UnauthorizedError, ForbiddenAdminError } from "@/lib/auth";
 
 export class NotFoundError extends Error {}
 export class ForbiddenError extends Error {}
@@ -9,7 +9,7 @@ export function handleApiError(err: unknown) {
   if (err instanceof UnauthorizedError) {
     return NextResponse.json({ error: err.message }, { status: 401 });
   }
-  if (err instanceof ForbiddenError) {
+  if (err instanceof ForbiddenError || err instanceof ForbiddenAdminError) {
     return NextResponse.json({ error: err.message }, { status: 403 });
   }
   if (err instanceof NotFoundError) {
