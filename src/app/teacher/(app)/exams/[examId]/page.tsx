@@ -41,6 +41,14 @@ export default async function ExamDetailPage({
             <Icon name="key" size={15} />
             رموز الدخول ({exam._count.codes})
           </Link>
+          <Link
+            href={`/teacher/print/${exam.id}`}
+            target="_blank"
+            className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          >
+            <Icon name="clipboard" size={15} />
+            نسخة للطباعة
+          </Link>
         </div>
         <h1 className="text-2xl font-bold text-brand-navy-dark">{exam.title}</h1>
       </div>
