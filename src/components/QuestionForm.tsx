@@ -73,10 +73,16 @@ export default function QuestionForm({
               setValue((v) => ({
                 ...v,
                 type,
+                // Non-multiple-choice types don't render choice inputs, so any
+                // stale (possibly empty-text) choices from a previous
+                // MULTIPLE_CHOICE selection must be dropped here — otherwise
+                // they'd still be submitted and rejected by server validation.
                 choices:
-                  type === "MULTIPLE_CHOICE" && v.choices.length < 2
-                    ? emptyValue.choices
-                    : v.choices,
+                  type === "MULTIPLE_CHOICE"
+                    ? v.choices.length < 2
+                      ? emptyValue.choices
+                      : v.choices
+                    : [],
               }));
             }}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"

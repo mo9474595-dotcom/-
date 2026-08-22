@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/brand/Icon";
 
-const ITEMS: { href: string; label: string; icon: "clipboard" | "users" | "clockHistory" | "trash" }[] = [
+const ITEMS: { href: string; label: string; icon: "clipboard" | "users" | "clockHistory" | "trash" | "folder" }[] = [
   { href: "/teacher/dashboard", label: "الامتحانات", icon: "clipboard" },
   { href: "/teacher/classes", label: "الشعب والطلاب", icon: "users" },
+  { href: "/teacher/question-bank", label: "بنك الأسئلة", icon: "folder" },
   { href: "/teacher/audit-log", label: "سجل التعديلات", icon: "clockHistory" },
   { href: "/teacher/trash", label: "سلة المحذوفات", icon: "trash" },
 ];

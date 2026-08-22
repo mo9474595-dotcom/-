@@ -56,6 +56,7 @@ model Teacher {
   exams         Exam[]
   classSections ClassSection[]
   auditLogs     AuditLog[]
+  bankQuestions BankQuestion[]
 }
 
 // A record of a sensitive manual action a teacher took, for accountability
@@ -273,6 +274,37 @@ model Choice {
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   answers Answer[] @relation("SelectedChoice")
+}
+
+// A teacher's personal, reusable library of questions — independent of any
+// one exam. Questions are copied into an Exam's Question/Choice rows when
+// inserted, so later edits here or deleting a bank entry never affect an
+// exam that already used it.
+model BankQuestion {
+  id            String       @id @default(cuid())
+  type          QuestionType @default(MULTIPLE_CHOICE)
+  text          String
+  points        Int          @default(1)
+  correctAnswer String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  choices BankChoice[]
+
+  @@index([teacherId])
+}
+
+model BankChoice {
+  id        String  @id @default(cuid())
+  text      String
+  isCorrect Boolean @default(false)
+  order     Int     @default(0)
+
+  bankQuestionId String
+  bankQuestion   BankQuestion @relation(fields: [bankQuestionId], references: [id], onDelete: Cascade)
 }
 
 // A code the teacher generates and shares with a specific student (or a batch).

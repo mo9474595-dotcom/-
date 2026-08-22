@@ -6,6 +6,7 @@ import type { Exam, Question, Choice } from "@prisma/client";
 import QuestionForm, { QuestionFormValue } from "@/components/QuestionForm";
 import { useUI } from "@/components/ui/UIProvider";
 import ExamScheduleEditor from "./ExamScheduleEditor";
+import BankQuestionPicker from "./BankQuestionPicker";
 import Icon from "@/components/brand/Icon";
 
 type QuestionWithChoices = Question & { choices: Choice[] };
@@ -22,7 +23,9 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
   const { confirm, toast } = useUI();
   const [isPublished, setIsPublished] = useState(exam.isPublished);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBankPicker, setShowBankPicker] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingToBankId, setSavingToBankId] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   // Tracked separately from exam.questions (a server-refreshed prop) so the
@@ -119,6 +122,37 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
     router.refresh();
   }
 
+  async function handleSaveToBank(questionId: string) {
+    setSavingToBankId(questionId);
+    const res = await fetch(`/api/teacher/questions/${questionId}/save-to-bank`, {
+      method: "POST",
+    });
+    setSavingToBankId(null);
+    if (res.ok) {
+      toast("تم حفظ السؤال في بنك الأسئلة", "success");
+    } else {
+      const data = await res.json().catch(() => null);
+      toast(data?.error ?? "تعذر حفظ السؤال في البنك", "error");
+    }
+  }
+
+  async function handleAddFromBank(bankQuestionIds: string[]) {
+    const res = await fetch(`/api/teacher/exams/${exam.id}/questions/from-bank`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bankQuestionIds }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      return data?.error ?? "تعذر إضافة الأسئلة من البنك";
+    }
+    const data = await res.json();
+    setShowBankPicker(false);
+    setQuestionCount((c) => c + (data.questions?.length ?? 0));
+    toast(`تمت إضافة ${data.questions?.length ?? 0} سؤال من البنك`, "success");
+    router.refresh();
+  }
+
   return (
     <div className="mt-6 flex flex-col gap-6">
       <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -166,15 +200,32 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
             <Icon name="clipboard" size={17} className="text-brand-blue" />
             الأسئلة ({exam.questions.length})
           </h2>
-          {!showAddForm && (
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="text-sm font-medium text-brand-blue hover:underline"
-            >
-              + إضافة سؤال
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {!showBankPicker && (
+              <button
+                onClick={() => setShowBankPicker(true)}
+                className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline"
+              >
+                <Icon name="folder" size={14} />
+                إضافة من بنك الأسئلة
+              </button>
+            )}
+            {!showAddForm && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="text-sm font-medium text-brand-blue hover:underline"
+              >
+                + إضافة سؤال
+              </button>
+            )}
+          </div>
         </div>
+
+        {showBankPicker && (
+          <div className="mt-4">
+            <BankQuestionPicker onAdd={handleAddFromBank} onCancel={() => setShowBankPicker(false)} />
+          </div>
+        )}
 
         {showAddForm && (
           <div className="mt-4">
@@ -228,6 +279,13 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
                       className="font-medium text-brand-blue hover:underline"
                     >
                       تعديل
+                    </button>
+                    <button
+                      onClick={() => handleSaveToBank(q.id)}
+                      disabled={savingToBankId === q.id}
+                      className="font-medium text-slate-600 hover:underline disabled:opacity-60"
+                    >
+                      {savingToBankId === q.id ? "جارٍ الحفظ..." : "حفظ في البنك"}
                     </button>
                     <button
                       onClick={() => handleDeleteQuestion(q.id)}

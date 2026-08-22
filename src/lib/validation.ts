@@ -33,6 +33,12 @@ export const questionSchema = z.object({
   choices: z.array(choiceSchema).optional(),
 });
 
+export const bankQuestionSchema = questionSchema;
+
+export const addFromBankSchema = z.object({
+  bankQuestionIds: z.array(z.string().min(1)).min(1).max(200),
+});
+
 export const joinExamSchema = z.object({
   code: z
     .string()

@@ -89,3 +89,13 @@ export async function getOwnedQuestion(teacherId: string, questionId: string) {
   }
   return question;
 }
+
+export async function getOwnedBankQuestion(teacherId: string, bankQuestionId: string) {
+  const bankQuestion = await prisma.bankQuestion.findUnique({
+    where: { id: bankQuestionId },
+  });
+  if (!bankQuestion || bankQuestion.teacherId !== teacherId) {
+    throw new NotFoundError("السؤال غير موجود في البنك");
+  }
+  return bankQuestion;
+}
