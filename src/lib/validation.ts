@@ -29,6 +29,22 @@ export const examSchema = z.object({
   maxTabViolations: z.coerce.number().int().min(0).max(20).default(3),
 });
 
+// A hand-written partial variant rather than examSchema.partial(): Zod's
+// .partial() only makes a field's *key* optional — a field with .default()
+// still gets that default substituted in when the key is omitted, so an
+// update that only sends e.g. {isPublished: true} would silently reset
+// maxTabViolations/shuffleQuestions/shuffleChoices back to their defaults.
+// Redefining each field with .optional() (no .default()) instead means an
+// omitted field truly parses to undefined, which callers can check for.
+export const examUpdateSchema = z.object({
+  title: z.string().trim().min(3, "عنوان الامتحان قصير جداً").max(200).optional(),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  durationMinutes: z.coerce.number().int().min(1).max(600).optional(),
+  shuffleQuestions: z.coerce.boolean().optional(),
+  shuffleChoices: z.coerce.boolean().optional(),
+  maxTabViolations: z.coerce.number().int().min(0).max(20).optional(),
+});
+
 export const choiceSchema = z.object({
   text: z.string().trim().min(1, "نص الخيار مطلوب").max(500),
   isCorrect: z.coerce.boolean().default(false),
@@ -38,6 +54,18 @@ export const questionSchema = z.object({
   type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]),
   text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000),
   points: z.coerce.number().int().min(1).max(100).default(1),
+  correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
+  choices: z.array(choiceSchema).optional(),
+});
+
+// See examUpdateSchema's comment: points has .default(1) on the base
+// schema, so questionSchema.partial() would silently reset points to 1 on
+// any edit that doesn't touch it (e.g. just editing the text). Redefined
+// without .default() so an omitted field parses to undefined.
+export const questionUpdateSchema = z.object({
+  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]).optional(),
+  text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000).optional(),
+  points: z.coerce.number().int().min(1).max(100).optional(),
   correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
   choices: z.array(choiceSchema).optional(),
 });
@@ -73,6 +101,17 @@ export const classSectionSchema = z.object({
   attendanceWeight: z.coerce.number().int().min(0).max(100).default(10),
 });
 
+// See examUpdateSchema's comment: all four weight fields have .default(),
+// so classSectionSchema.partial() would silently reset a class's grading
+// weights on any edit that doesn't touch them (e.g. renaming the class).
+export const classSectionUpdateSchema = z.object({
+  name: z.string().trim().min(1, "اسم الشعبة مطلوب").max(150).optional(),
+  examWeight: z.coerce.number().int().min(0).max(100).optional(),
+  manualGradeWeight: z.coerce.number().int().min(0).max(100).optional(),
+  projectWeight: z.coerce.number().int().min(0).max(100).optional(),
+  attendanceWeight: z.coerce.number().int().min(0).max(100).optional(),
+});
+
 export const studentSchema = z.object({
   fullName: z.string().trim().min(1, "اسم الطالب مطلوب").max(150),
   studentRef: z.string().trim().max(100).optional().or(z.literal("")),
@@ -96,6 +135,16 @@ export const projectSchema = z.object({
   title: z.string().trim().min(1, "عنوان المشروع مطلوب").max(200),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   maxScore: z.coerce.number().min(0.01).default(100),
+  dueDate: z.string().trim().optional().or(z.literal("")),
+});
+
+// See examUpdateSchema's comment: maxScore has .default(100), so
+// projectSchema.partial() would silently reset it on any edit that
+// doesn't touch it (e.g. just editing the title).
+export const projectUpdateSchema = z.object({
+  title: z.string().trim().min(1, "عنوان المشروع مطلوب").max(200).optional(),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  maxScore: z.coerce.number().min(0.01).optional(),
   dueDate: z.string().trim().optional().or(z.literal("")),
 });
 

@@ -4,7 +4,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedExam } from "@/lib/exams";
 import { logAudit } from "@/lib/audit";
-import { examSchema } from "@/lib/validation";
+import { examUpdateSchema } from "@/lib/validation";
 import { z } from "zod";
 
 type RouteParams = { params: Promise<{ examId: string }> };
@@ -39,7 +39,7 @@ const nullableDateTime = z
   .nullable()
   .transform((v) => (v ? new Date(v) : null));
 
-const updateSchema = examSchema.partial().extend({
+const updateSchema = examUpdateSchema.extend({
   isPublished: z.coerce.boolean().optional(),
   opensAt: nullableDateTime.optional(),
   closesAt: nullableDateTime.optional(),

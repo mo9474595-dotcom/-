@@ -4,7 +4,7 @@ import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedClassSection } from "@/lib/exams";
 import { logAudit } from "@/lib/audit";
-import { classSectionSchema } from "@/lib/validation";
+import { classSectionUpdateSchema } from "@/lib/validation";
 
 type RouteParams = { params: Promise<{ classId: string }> };
 
@@ -36,7 +36,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     await getOwnedClassSection(teacherId, classId);
 
     const body = await req.json().catch(() => null);
-    const parsed = classSectionSchema.partial().safeParse(body);
+    const parsed = classSectionUpdateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" },

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedProject } from "@/lib/exams";
-import { projectSchema } from "@/lib/validation";
+import { projectUpdateSchema } from "@/lib/validation";
 
 type RouteParams = { params: Promise<{ projectId: string }> };
 
@@ -14,7 +14,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     await getOwnedProject(teacherId, projectId);
 
     const body = await req.json().catch(() => null);
-    const parsed = projectSchema.partial().safeParse(body);
+    const parsed = projectUpdateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" },
