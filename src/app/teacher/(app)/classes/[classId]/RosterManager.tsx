@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { StudentProfile } from "@prisma/client";
@@ -23,6 +23,68 @@ export default function RosterManager({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Quote-aware CSV cell split so names containing a literal comma (e.g. "خالد, حسين")
+  // don't get broken apart or leak stray quote characters.
+  function parseCsvLine(line: string) {
+    const cells: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          current += ch;
+        }
+      } else if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        cells.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    cells.push(current.trim());
+    return cells;
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    const text = await file.text();
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      // Skip an obvious header row (e.g. "name,ref" / "الاسم,الرقم")
+      .filter((line, i) => !(i === 0 && /^(name|الاسم|full ?name)/i.test(line)));
+
+    const parsed = lines
+      .map((line) => {
+        const [fullName, studentRef] = parseCsvLine(line);
+        if (!fullName) return null;
+        return studentRef ? `${fullName}, ${studentRef}` : fullName;
+      })
+      .filter((l): l is string => Boolean(l));
+
+    if (parsed.length === 0) {
+      setError("لم يتم العثور على أسماء صالحة في الملف");
+      return;
+    }
+    setNamesText((prev) => (prev ? `${prev}\n${parsed.join("\n")}` : parsed.join("\n")));
+    toast(`تم قراءة ${parsed.length} اسماً من الملف — راجعها ثم اضغط إضافة`, "success");
+  }
 
   function copyPortalLink(studentId: string, portalToken: string) {
     const url = `${window.location.origin}/student/${portalToken}`;
@@ -122,13 +184,30 @@ export default function RosterManager({
           className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
         />
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex items-center gap-1.5 self-start rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
-        >
-          {loading ? "جارٍ الإضافة..." : "إضافة"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center gap-1.5 self-start rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy disabled:opacity-60"
+          >
+            {loading ? "جارٍ الإضافة..." : "إضافة"}
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 self-start rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            <Icon name="folder" size={15} className="text-brand-blue" />
+            رفع ملف CSV
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
       </form>
 
       <div className="mt-4 flex items-center justify-between gap-3">
