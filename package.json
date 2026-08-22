@@ -12,7 +12,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "test:e2e": "playwright test",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsx prisma/fix-passwords-once.ts && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
