@@ -4,11 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/brand/Icon";
 
-type IconName = "clipboard" | "users" | "clockHistory" | "trash" | "folder" | "scale" | "shield";
+type IconName =
+  | "clipboard"
+  | "users"
+  | "clockHistory"
+  | "trash"
+  | "folder"
+  | "scale"
+  | "shield"
+  | "calendarCheck";
 
 const ITEMS: { href: string; label: string; icon: IconName }[] = [
   { href: "/teacher/dashboard", label: "الامتحانات", icon: "clipboard" },
   { href: "/teacher/classes", label: "الشعب والطلاب", icon: "users" },
+  { href: "/teacher/calendar", label: "التقويم", icon: "calendarCheck" },
   { href: "/teacher/question-bank", label: "بنك الأسئلة", icon: "folder" },
   { href: "/teacher/statistics", label: "الإحصائيات", icon: "scale" },
   { href: "/teacher/audit-log", label: "سجل التعديلات", icon: "clockHistory" },
