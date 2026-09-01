@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
+import { computeSuspiciousPairs } from "@/lib/integrity";
 import ResultsTableClient from "./ResultsTableClient";
 import PublishResultsToggle from "./PublishResultsToggle";
+import Icon from "@/components/brand/Icon";
 
 export default async function ResultsPage({
   params,
@@ -27,6 +29,8 @@ export default async function ResultsPage({
     },
   });
 
+  const suspiciousPairs = await computeSuspiciousPairs(examId);
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -45,6 +49,39 @@ export default async function ResultsPage({
         سؤال. يُفضَّل نشرها بعد الانتهاء من تصحيح الأسئلة ذات الإجابة القصيرة يدوياً.
       </p>
       <ResultsTableClient examId={examId} attempts={attempts} />
+
+      {suspiciousPairs.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            <Icon name="shield" size={17} className="text-red-600" />
+            تحليل النزاهة الأكاديمية
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            أزواج طلاب اختاروا نفس الإجابة الخاطئة بالضبط في أكثر من سؤالين — تطابق الإجابات
+            الصحيحة أمر طبيعي، لكن تكرار نفس الخطأ تحديداً بين طالبين مؤشر يستحق المراجعة اليدوية،
+            وليس دليلاً قاطعاً على الغش.
+          </p>
+          <div className="mt-4 flex flex-col gap-3">
+            {suspiciousPairs.map((pair, i) => (
+              <div key={i} className="rounded-xl border border-red-200 bg-red-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium text-red-800">
+                    {pair.studentA} ⇄ {pair.studentB}
+                  </p>
+                  <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                    {pair.sharedWrongCount} إجابة خاطئة مشتركة من {pair.totalCommonQuestions}
+                  </span>
+                </div>
+                <ul className="mt-2 flex flex-col gap-0.5 text-xs text-red-700">
+                  {pair.sharedWrongQuestions.map((q, qi) => (
+                    <li key={qi}>• {q}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
