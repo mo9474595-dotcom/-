@@ -39,12 +39,20 @@ const nullableDateTime = z
   .nullable()
   .transform((v) => (v ? new Date(v) : null));
 
+const nullableInt = z.coerce
+  .number()
+  .int()
+  .min(1)
+  .optional()
+  .nullable();
+
 const updateSchema = examUpdateSchema.extend({
   isPublished: z.coerce.boolean().optional(),
   resultsPublished: z.coerce.boolean().optional(),
   resultsPublishAt: nullableDateTime.optional(),
   opensAt: nullableDateTime.optional(),
   closesAt: nullableDateTime.optional(),
+  questionPoolSize: nullableInt,
 });
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
@@ -62,12 +70,22 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { opensAt, closesAt, ...rest } = parsed.data;
+    const { opensAt, closesAt, questionPoolSize, ...rest } = parsed.data;
     if (opensAt && closesAt && opensAt >= closesAt) {
       return NextResponse.json(
         { error: "وقت الفتح يجب أن يكون قبل وقت الإغلاق" },
         { status: 400 }
       );
+    }
+
+    if (questionPoolSize != null) {
+      const questionCount = await prisma.question.count({ where: { examId } });
+      if (questionPoolSize >= questionCount) {
+        return NextResponse.json(
+          { error: `عدد الأسئلة في المجموعة يجب أن يكون أقل من إجمالي أسئلة الامتحان (${questionCount})` },
+          { status: 400 }
+        );
+      }
     }
 
     const exam = await prisma.exam.update({
@@ -76,6 +94,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         ...rest,
         ...(opensAt !== undefined ? { opensAt } : {}),
         ...(closesAt !== undefined ? { closesAt } : {}),
+        ...(questionPoolSize !== undefined ? { questionPoolSize } : {}),
       },
     });
 

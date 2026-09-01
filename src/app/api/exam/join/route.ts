@@ -95,7 +95,19 @@ export async function POST(req: NextRequest) {
     }
 
     const questionIds = exam.questions.map((q) => q.id);
-    const orderedQuestionIds = exam.shuffleQuestions ? shuffle(questionIds) : questionIds;
+    // When a question pool is configured, draw a random subset for this
+    // attempt (preserving the exam's original question order within that
+    // subset), then apply the normal shuffle-order setting on top of it —
+    // so two students can end up with genuinely different questions, not
+    // just the same questions in a different order.
+    let selectedQuestionIds = questionIds;
+    if (exam.questionPoolSize && exam.questionPoolSize < questionIds.length) {
+      const picked = new Set(shuffle(questionIds).slice(0, exam.questionPoolSize));
+      selectedQuestionIds = questionIds.filter((id) => picked.has(id));
+    }
+    const orderedQuestionIds = exam.shuffleQuestions
+      ? shuffle(selectedQuestionIds)
+      : selectedQuestionIds;
 
     const choiceOrderMap: Record<string, string[]> = {};
     for (const q of exam.questions) {

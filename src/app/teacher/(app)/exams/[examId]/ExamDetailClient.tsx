@@ -6,6 +6,7 @@ import type { Exam, Question, Choice } from "@prisma/client";
 import QuestionForm, { QuestionFormValue } from "@/components/QuestionForm";
 import { useUI } from "@/components/ui/UIProvider";
 import ExamScheduleEditor from "./ExamScheduleEditor";
+import QuestionPoolEditor from "./QuestionPoolEditor";
 import BankQuestionPicker from "./BankQuestionPicker";
 import Icon from "@/components/brand/Icon";
 
@@ -216,6 +217,12 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
         examId={exam.id}
         initialOpensAt={exam.opensAt}
         initialClosesAt={exam.closesAt}
+      />
+
+      <QuestionPoolEditor
+        examId={exam.id}
+        totalQuestions={exam.questions.length}
+        initialPoolSize={exam.questionPoolSize}
       />
 
       <div className="rounded-2xl bg-white p-5 shadow-sm">

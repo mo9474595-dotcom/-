@@ -295,6 +295,13 @@ model Exam {
   // isResultsPublished in exam-review.ts) — checked lazily on the next
   // read rather than needing a background job.
   resultsPublishAt DateTime?
+  // If set (and smaller than the total question count), each student's
+  // attempt draws this many questions at random from the full set instead
+  // of seeing every question — a stronger anti-cheat measure than shuffled
+  // order alone, since neighboring students can end up with genuinely
+  // different questions. Null means "use every question," the original
+  // behavior.
+  questionPoolSize Int?
   // Optional availability window on top of isPublished. Null means "no
   // restriction on that side" — e.g. opensAt set with closesAt null stays
   // open indefinitely once it opens.

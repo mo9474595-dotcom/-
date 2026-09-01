@@ -39,9 +39,21 @@ export async function finalizeAttempt(attemptId: string, status: AttemptStatus) 
 
   const exam = await prisma.exam.findUniqueOrThrow({
     where: { id: attempt.examId },
-    select: { id: true, title: true, teacherId: true, questions: { select: { points: true } } },
+    select: {
+      id: true,
+      title: true,
+      teacherId: true,
+      questions: { select: { id: true, points: true } },
+    },
   });
-  const maxScore = exam.questions.reduce((sum, q) => sum + q.points, 0);
+  // Scoped to the questions actually assigned to this attempt (its
+  // questionOrder), not every question the exam has — with a randomized
+  // question pool, those can differ, and summing every question's points
+  // would overstate what this student could possibly have scored.
+  const assignedQuestionIds = new Set<string>(JSON.parse(attempt.questionOrder));
+  const maxScore = exam.questions
+    .filter((q) => assignedQuestionIds.has(q.id))
+    .reduce((sum, q) => sum + q.points, 0);
 
   await prisma.examAttempt.update({
     where: { id: attemptId },
