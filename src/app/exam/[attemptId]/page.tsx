@@ -20,10 +20,33 @@ function formatTime(ms: number) {
   return `${m}:${s}`;
 }
 
+const TIME_WARNING_MS = 5 * 60_000;
+
+type SaveStatus = "saving" | "saved" | "error";
+
+function playBeep() {
+  try {
+    const AudioCtx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+    osc.onended = () => ctx.close();
+  } catch {
+    // Some browsers block audio without a fresh user gesture — the visual
+    // warning still shows either way, so a failed beep is harmless to ignore.
+  }
+}
+
 export default function ExamPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const router = useRouter();
-  const { confirm } = useUI();
+  const { confirm, toast } = useUI();
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -33,6 +56,10 @@ export default function ExamPage() {
   const [deadline, setDeadline] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [index, setIndex] = useState(0);
+  const [saveStatus, setSaveStatus] = useState<Record<string, SaveStatus>>({});
+  const [isOnline, setIsOnline] = useState(
+    () => typeof navigator === "undefined" || navigator.onLine
+  );
 
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   // Debounced saves that haven't fired yet, keyed by question id — flushed
@@ -41,6 +68,10 @@ export default function ExamPage() {
   // the last answer to the 500ms debounce window.
   const pendingSaves = useRef<Record<string, () => Promise<void>>>({});
   const inFlightSaves = useRef<Set<Promise<void>>>(new Set());
+  // Answers whose save request failed (network drop, mainly) — retried
+  // automatically once the connection comes back, rather than silently lost.
+  const failedAnswers = useRef<Record<string, LocalAnswer>>({});
+  const timeWarnedRef = useRef(false);
 
   const handleTerminated = useCallback(() => {
     setPhase("done");
@@ -92,6 +123,14 @@ export default function ExamPage() {
     pendingSaves.current = {};
     await Promise.all(fns.map((fn) => fn()));
     await Promise.all(Array.from(inFlightSaves.current));
+    // Retry any answer whose save already failed once (e.g. a dropped
+    // connection) so a submit can't silently finalize without it.
+    const retryEntries = Object.entries(failedAnswers.current);
+    await Promise.all(retryEntries.map(([qId, ans]) => doSave(qId, ans)));
+    // doSave is a stable function declaration (attemptId/refs/setters only)
+    // re-created each render but functionally identical — omitted to avoid
+    // pointlessly invalidating this callback's identity every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = useCallback(async () => {
@@ -121,14 +160,64 @@ export default function ExamPage() {
     if (phase === "done") router.replace(`/exam/${attemptId}/submitted`);
   }, [phase, attemptId, router]);
 
+  // Warn once (visually + a short beep) the first time remaining time drops
+  // to the threshold — not on every tick after, and not a hard requirement
+  // the student act on immediately (the countdown itself stays authoritative).
+  useEffect(() => {
+    if (
+      phase === "active" &&
+      remainingMs != null &&
+      remainingMs <= TIME_WARNING_MS &&
+      !timeWarnedRef.current
+    ) {
+      timeWarnedRef.current = true;
+      toast("تبقّى أقل من 5 دقائق على انتهاء الامتحان!", "error");
+      playBeep();
+    }
+  }, [phase, remainingMs, toast]);
+
+  // Track connectivity so a dropped connection shows a clear state instead
+  // of answers silently failing to save.
+  useEffect(() => {
+    function goOnline() {
+      setIsOnline(true);
+      retryFailedSaves();
+    }
+    function goOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function retryFailedSaves() {
+    const entries = Object.entries(failedAnswers.current);
+    for (const [questionId, answer] of entries) {
+      doSave(questionId, answer);
+    }
+  }
+
   function doSave(questionId: string, answer: LocalAnswer): Promise<void> {
+    setSaveStatus((s) => ({ ...s, [questionId]: "saving" }));
     const p = fetch(`/api/exam/${attemptId}/answer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ questionId, ...answer }),
     })
-      .catch(() => {})
-      .then(() => {});
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        delete failedAnswers.current[questionId];
+        setSaveStatus((s) => ({ ...s, [questionId]: "saved" }));
+      })
+      .catch(() => {
+        failedAnswers.current[questionId] = answer;
+        setSaveStatus((s) => ({ ...s, [questionId]: "error" }));
+      });
     inFlightSaves.current.add(p);
     p.finally(() => inFlightSaves.current.delete(p));
     return p;
@@ -207,7 +296,9 @@ export default function ExamPage() {
           <div
             className={`flex items-center gap-2 rounded-xl border px-3 py-1.5 font-mono font-semibold ${
               remainingMs != null && remainingMs < 60_000
-                ? "border-red-200 bg-red-50 text-red-700"
+                ? "border-red-200 bg-red-50 text-red-700 animate-pulse"
+                : remainingMs != null && remainingMs < TIME_WARNING_MS
+                ? "border-amber-200 bg-amber-50 text-amber-700"
                 : "border-blue-100 bg-brand-panel text-brand-blue"
             }`}
           >
@@ -228,6 +319,12 @@ export default function ExamPage() {
       {warning && (
         <div className="fixed inset-x-0 top-16 z-20 mx-auto w-full max-w-md rounded-xl bg-red-600 px-4 py-3 text-center text-sm font-medium text-white shadow-lg">
           {warning}
+        </div>
+      )}
+
+      {!isOnline && (
+        <div className="fixed inset-x-0 top-16 z-20 mx-auto w-full max-w-md rounded-xl bg-amber-500 px-4 py-3 text-center text-sm font-medium text-white shadow-lg">
+          انقطع الاتصال بالإنترنت — إجاباتك محفوظة محلياً وستُرسَل تلقائياً عند عودة الاتصال
         </div>
       )}
 
@@ -269,6 +366,7 @@ export default function ExamPage() {
               </span>
             </div>
             <p className="mt-4 text-lg font-medium text-slate-900">{current.text}</p>
+            <SaveStatusBadge status={saveStatus[current.id]} />
 
             {current.type !== "SHORT_ANSWER" ? (
               <div className="mt-5 flex flex-col gap-2">
@@ -339,6 +437,22 @@ export default function ExamPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function SaveStatusBadge({ status }: { status?: SaveStatus }) {
+  if (!status) return null;
+  if (status === "saving") {
+    return <p className="mt-1 text-xs text-slate-400">جارٍ الحفظ...</p>;
+  }
+  if (status === "error") {
+    return <p className="mt-1 text-xs font-medium text-red-600">تعذر الحفظ، ستتم إعادة المحاولة تلقائياً</p>;
+  }
+  return (
+    <p className="mt-1 flex items-center gap-1 text-xs font-medium text-green-600">
+      <Icon name="check" size={12} />
+      تم الحفظ
+    </p>
   );
 }
 
