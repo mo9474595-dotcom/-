@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdminId, ForbiddenAdminError } from "@/lib/auth";
+import { getOrgSettings } from "@/lib/org-settings";
 import AdminTeachersClient from "./AdminTeachersClient";
+import OrgBrandingEditor from "./OrgBrandingEditor";
 import Icon from "@/components/brand/Icon";
 
 export default async function AdminPage() {
@@ -12,6 +14,8 @@ export default async function AdminPage() {
     if (err instanceof ForbiddenAdminError) notFound();
     throw err;
   }
+
+  const orgSettings = await getOrgSettings();
 
   const teachers = await prisma.teacher.findMany({
     orderBy: { createdAt: "desc" },
@@ -33,6 +37,13 @@ export default async function AdminPage() {
       <p className="mt-1 max-w-2xl text-sm text-slate-500">
         نظرة عامة على جميع حسابات الأساتذة المسجلين في المنصة.
       </p>
+      <div className="mt-6">
+        <OrgBrandingEditor
+          initialName={orgSettings.name}
+          initialTagline={orgSettings.tagline}
+          initialLogoDataUrl={orgSettings.logoDataUrl}
+        />
+      </div>
       <div className="mt-6">
         <AdminTeachersClient initialTeachers={teachers} currentAdminId={adminId} />
       </div>

@@ -1,15 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
- * Renders the organization logo from /public/brand/logo.png when present,
- * falling back to an initials badge until the real asset is added.
+ * Renders the org logo: an admin-uploaded one from OrgSettings if set,
+ * falling back to /public/brand/logo.png, falling back further to an
+ * initials badge until either is available.
  */
 export default function OrgLogo({ size = 48 }: { size?: number }) {
-  const [failed, setFailed] = useState(false);
+  const [customLogo, setCustomLogo] = useState<string | null | undefined>(undefined);
+  const [staticFailed, setStaticFailed] = useState(false);
 
-  if (failed) {
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/org-settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled) setCustomLogo(data?.settings?.logoDataUrl ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setCustomLogo(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (customLogo) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={customLogo}
+        alt="شعار المنصة"
+        width={size}
+        height={size}
+        style={{ width: size, height: size }}
+        className="shrink-0 rounded-full bg-white object-contain shadow-sm"
+      />
+    );
+  }
+
+  if (staticFailed) {
     return (
       <div
         style={{ width: size, height: size }}
@@ -24,12 +55,12 @@ export default function OrgLogo({ size = 48 }: { size?: number }) {
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/brand/logo.png"
-      alt="شعار منظمة رياض النجاح للتنمية المستدامة"
+      alt="شعار المنصة"
       width={size}
       height={size}
       style={{ width: size, height: size }}
       className="shrink-0 rounded-full bg-white object-contain shadow-sm"
-      onError={() => setFailed(true)}
+      onError={() => setStaticFailed(true)}
     />
   );
 }

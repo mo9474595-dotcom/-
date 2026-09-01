@@ -71,6 +71,19 @@ model Teacher {
   backups          Backup[]
 }
 
+// A single row (id always "singleton") holding this deployment's
+// white-label identity — the org name/tagline/logo shown across the app
+// in place of the built-in default. Absent row means "use the defaults"
+// (see getOrgSettings in lib/org-settings.ts), so a fresh deployment needs
+// no setup to look right.
+model OrgSettings {
+  id          String   @id @default("singleton")
+  name        String?
+  tagline     String?
+  logoDataUrl String?
+  updatedAt   DateTime @updatedAt
+}
+
 // A scheduled automatic snapshot of everything a teacher owns (same shape
 // as the manual export), generated periodically by /api/cron/backups.
 // Only the most recent few are kept per teacher (see the cron route) so

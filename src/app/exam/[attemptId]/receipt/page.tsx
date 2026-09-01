@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getExamSessionToken } from "@/lib/exam-session";
 import { prisma } from "@/lib/prisma";
+import { getOrgSettings } from "@/lib/org-settings";
 import ScoreFraction from "@/components/ScoreFraction";
 import OrgLogo from "@/components/brand/OrgLogo";
 import ReceiptPrintButton from "./ReceiptPrintButton";
@@ -32,6 +33,8 @@ export default async function ExamReceiptPage({
     return <CenteredMessage text="لم تُسلَّم هذه المحاولة بعد." />;
   }
 
+  const orgSettings = await getOrgSettings();
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-4 py-10">
       <ReceiptPrintButton />
@@ -42,7 +45,9 @@ export default async function ExamReceiptPage({
       >
         <div className="flex flex-col items-center gap-2">
           <OrgLogo size={56} />
-          <p className="text-sm font-medium text-slate-500">منظمة رياض النجاح للتنمية المستدامة</p>
+          <p className="text-sm font-medium text-slate-500">
+            {orgSettings.name} {orgSettings.tagline}
+          </p>
         </div>
 
         <h1 className="mt-6 text-2xl font-bold text-brand-navy-dark">إيصال إتمام الامتحان</h1>

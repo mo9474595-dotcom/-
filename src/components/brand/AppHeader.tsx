@@ -1,5 +1,10 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
 import OrgLogo from "./OrgLogo";
+
+const DEFAULT_NAME = "منظمة رياض النجاح";
+const DEFAULT_TAGLINE = "للتنمية المستدامة";
 
 export default function AppHeader({
   title,
@@ -10,6 +15,24 @@ export default function AppHeader({
   icon?: ReactNode;
   rightExtra?: ReactNode;
 }) {
+  const [orgName, setOrgName] = useState(DEFAULT_NAME);
+  const [orgTagline, setOrgTagline] = useState(DEFAULT_TAGLINE);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/org-settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.settings) return;
+        setOrgName(data.settings.name || DEFAULT_NAME);
+        setOrgTagline(data.settings.tagline || DEFAULT_TAGLINE);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <header className="brand-header-gradient relative overflow-hidden">
       <div className="brand-dot-grid pointer-events-none absolute -top-2 left-4 h-20 w-32 text-white/20 sm:block" />
@@ -34,8 +57,8 @@ export default function AppHeader({
         <div className="flex items-center gap-3">
           {rightExtra}
           <div className="hidden text-right sm:block">
-            <p className="text-sm font-bold text-white">منظمة رياض النجاح</p>
-            <p className="text-xs text-white/80">للتنمية المستدامة</p>
+            <p className="text-sm font-bold text-white">{orgName}</p>
+            <p className="text-xs text-white/80">{orgTagline}</p>
           </div>
           <OrgLogo size={44} />
         </div>

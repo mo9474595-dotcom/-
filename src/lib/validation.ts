@@ -42,6 +42,20 @@ export const examUpdateSchema = z.object({
   maxTabViolations: z.coerce.number().int().min(0).max(20).optional(),
 });
 
+const orgLogoDataUrl = z
+  .string()
+  .trim()
+  .max(1_500_000, "حجم الشعار كبير جداً")
+  .refine((v) => v === "" || v.startsWith("data:image/"), "صيغة الشعار غير صالحة")
+  .optional()
+  .or(z.literal(""));
+
+export const orgSettingsSchema = z.object({
+  name: z.string().trim().min(2, "الاسم قصير جداً").max(100).optional().or(z.literal("")),
+  tagline: z.string().trim().max(150).optional().or(z.literal("")),
+  logoDataUrl: orgLogoDataUrl.nullable(),
+});
+
 export const choiceSchema = z.object({
   text: z.string().trim().min(1, "نص الخيار مطلوب").max(500),
   isCorrect: z.coerce.boolean().default(false),

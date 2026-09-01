@@ -1,6 +1,12 @@
 import Link from "next/link";
 import OrgLogo from "@/components/brand/OrgLogo";
 import Icon from "@/components/brand/Icon";
+import { getOrgSettings } from "@/lib/org-settings";
+
+// Was static by default (no dynamic API used); branding is admin-editable
+// at runtime now, so this page must re-read it on every request instead of
+// being frozen at build time.
+export const dynamic = "force-dynamic";
 
 const TRUST_BADGES: { icon: "shield" | "clock" | "users"; title: string; desc: string }[] = [
   { icon: "shield", title: "آمن وموثوق", desc: "حماية كاملة لبياناتك" },
@@ -8,7 +14,8 @@ const TRUST_BADGES: { icon: "shield" | "clock" | "users"; title: string; desc: s
   { icon: "users", title: "دعم مستمر", desc: "فريق دعم لمساعدتك دائماً" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const orgSettings = await getOrgSettings();
   return (
     <div className="flex flex-1 flex-col">
       {/* Top utility bar */}
@@ -18,7 +25,7 @@ export default function Home() {
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-white">الموقع الرسمي</p>
               <p className="text-xs text-white/80">
-                التابع لمنظمة رياض النجاح للتنمية المستدامة
+                التابع ل{orgSettings.name} {orgSettings.tagline}
               </p>
             </div>
             <OrgLogo size={44} />
@@ -37,7 +44,7 @@ export default function Home() {
             الموقع الرسمي
           </h1>
           <p className="mt-2 text-xl font-bold text-brand-green">
-            التابع لمنظمة رياض النجاح للتنمية المستدامة
+            التابع ل{orgSettings.name} {orgSettings.tagline}
           </p>
           <p className="mt-4 text-base text-slate-600">
             منصة تعليمية تابعة للمنظمة لخدمة المتدربين والكوادر التعليمية.
@@ -107,7 +114,7 @@ export default function Home() {
       </div>
 
       <div className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        جميع الحقوق محفوظة © {new Date().getFullYear()} منظمة رياض النجاح للتنمية المستدامة
+        جميع الحقوق محفوظة © {new Date().getFullYear()} {orgSettings.name} {orgSettings.tagline}
       </div>
     </div>
   );
