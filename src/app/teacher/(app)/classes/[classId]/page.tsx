@@ -39,6 +39,13 @@ export default async function ClassDetailPage({
             <Icon name="cloud" size={16} />
             تصدير الدرجات (CSV)
           </a>
+          <a
+            href={`/api/teacher/classes/${classId}/report`}
+            className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          >
+            <Icon name="clipboard" size={16} />
+            تقرير أداء (PowerPoint)
+          </a>
           <Link
             href={`/teacher/classes/${classId}/attendance`}
             className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
