@@ -44,7 +44,7 @@ export default function QuickJoinButton({
       >
         {loading ? "..." : label}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

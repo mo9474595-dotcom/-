@@ -38,10 +38,13 @@ export default async function ExamReviewPage({
 
 function CenteredMessage({ text }: { text: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-        <p className="text-sm text-slate-600">{text}</p>
-        <Link href="/" className="mt-4 inline-block text-sm font-medium text-brand-blue hover:underline">
+    <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16 dark:bg-slate-900">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg dark:bg-slate-800">
+        <p className="text-sm text-slate-600 dark:text-slate-400">{text}</p>
+        <Link
+          href="/"
+          className="mt-4 inline-block text-sm font-medium text-brand-blue hover:underline dark:text-blue-400"
+        >
           العودة للصفحة الرئيسية
         </Link>
       </div>

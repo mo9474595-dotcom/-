@@ -6,6 +6,7 @@ import { useExamLockdown } from "@/components/useExamLockdown";
 import { useUI } from "@/components/ui/UIProvider";
 import type { ApiQuestion, ExamStateResponse } from "@/lib/exam-client-types";
 import Icon from "@/components/brand/Icon";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Phase = "intro" | "loading" | "active" | "submitting" | "done" | "error";
 
@@ -246,13 +247,14 @@ export default function ExamPage() {
 
   if (phase === "intro") {
     return (
-      <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+      <div className="relative flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16 dark:bg-slate-900">
+        <ThemeToggle className="absolute right-4 top-4" />
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg dark:bg-slate-800">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue dark:bg-slate-700 dark:text-blue-300">
             <Icon name="shield" size={24} />
           </div>
-          <h1 className="text-xl font-bold text-brand-navy-dark">قبل أن تبدأ</h1>
-          <ul className="mt-4 flex flex-col gap-2 text-right text-sm text-slate-600">
+          <h1 className="text-xl font-bold text-brand-navy-dark dark:text-slate-100">قبل أن تبدأ</h1>
+          <ul className="mt-4 flex flex-col gap-2 text-right text-sm text-slate-600 dark:text-slate-400">
             <li>• سيدخل المتصفح في وضع الشاشة الكاملة إلزامياً.</li>
             <li>• الخروج من الصفحة أو التبويب أو الشاشة الكاملة يُسجَّل ويُبلَّغ للأستاذ.</li>
             <li>• النسخ واللصق والقائمة المنسدلة معطّلة طوال الامتحان.</li>
@@ -290,16 +292,16 @@ export default function ExamPage() {
   }).length;
 
   return (
-    <div className="exam-lockdown flex flex-1 flex-col bg-brand-page-tint">
-      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div className="exam-lockdown flex flex-1 flex-col bg-brand-page-tint dark:bg-slate-900">
+      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div
             className={`flex items-center gap-2 rounded-xl border px-3 py-1.5 font-mono font-semibold ${
               remainingMs != null && remainingMs < 60_000
-                ? "border-red-200 bg-red-50 text-red-700 animate-pulse"
+                ? "border-red-200 bg-red-50 text-red-700 animate-pulse dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
                 : remainingMs != null && remainingMs < TIME_WARNING_MS
-                ? "border-amber-200 bg-amber-50 text-amber-700"
-                : "border-blue-100 bg-brand-panel text-brand-blue"
+                ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                : "border-blue-100 bg-brand-panel text-brand-blue dark:border-slate-600 dark:bg-slate-700 dark:text-blue-300"
             }`}
           >
             <Icon name="clock" size={16} />
@@ -307,11 +309,12 @@ export default function ExamPage() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             {violations > 0 && (
-              <span className="rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-700">
+              <span className="rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-700 dark:bg-red-900/40 dark:text-red-300">
                 مخالفات: {violations}
               </span>
             )}
-            <h1 className="text-sm font-semibold text-slate-900 sm:text-base">{examTitle}</h1>
+            <h1 className="text-sm font-semibold text-slate-900 sm:text-base dark:text-slate-100">{examTitle}</h1>
+            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -342,8 +345,8 @@ export default function ExamPage() {
                   i === index
                     ? "bg-brand-blue text-white"
                     : answered
-                    ? "bg-green-100 text-green-700"
-                    : "bg-white text-slate-500 border border-slate-200"
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                    : "bg-white text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                 }`}
               >
                 {i + 1}
@@ -351,27 +354,27 @@ export default function ExamPage() {
             );
           })}
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           تم الإجابة على {answeredCount} من {questions.length}
         </p>
 
         {current && (
-          <div className="w-full rounded-2xl bg-white p-6 shadow-sm">
+          <div className="w-full rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
             <div className="flex items-center justify-between">
-              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark">
+              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark dark:bg-slate-700 dark:text-blue-300">
                 درجة {current.points}
               </span>
-              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark">
+              <span className="rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-navy-dark dark:bg-slate-700 dark:text-blue-300">
                 سؤال {index + 1} من {questions.length}
               </span>
             </div>
-            <p className="mt-4 text-lg font-medium text-slate-900">{current.text}</p>
+            <p className="mt-4 text-lg font-medium text-slate-900 dark:text-slate-100">{current.text}</p>
             {current.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset
               <img
                 src={current.imageUrl}
                 alt="صورة السؤال"
-                className="mt-3 max-h-96 w-full rounded-xl border border-slate-200 object-contain"
+                className="mt-3 max-h-96 w-full rounded-xl border border-slate-200 object-contain dark:border-slate-700"
               />
             )}
             <SaveStatusBadge status={saveStatus[current.id]} />
@@ -383,8 +386,8 @@ export default function ExamPage() {
                     key={c.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition ${
                       answers[current.id]?.selectedChoiceId === c.id
-                        ? "border-brand-blue bg-brand-panel"
-                        : "border-slate-200 hover:bg-slate-50"
+                        ? "border-brand-blue bg-brand-panel dark:border-blue-500 dark:bg-slate-700"
+                        : "border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/60"
                     }`}
                   >
                     <input
@@ -394,7 +397,7 @@ export default function ExamPage() {
                       onChange={() => setChoice(current.id, c.id)}
                       className="accent-brand-blue"
                     />
-                    {c.text}
+                    <span className="dark:text-slate-200">{c.text}</span>
                   </label>
                 ))}
               </div>
@@ -404,7 +407,7 @@ export default function ExamPage() {
                 onChange={(e) => setText(current.id, e.target.value)}
                 rows={5}
                 placeholder="اكتب إجابتك هنا..."
-                className="mt-5 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+                className="mt-5 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
               />
             )}
 
@@ -412,7 +415,7 @@ export default function ExamPage() {
               <button
                 onClick={() => setIndex((i) => Math.max(0, i - 1))}
                 disabled={index === 0}
-                className="flex items-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300"
               >
                 السابق ‹
               </button>
@@ -451,13 +454,17 @@ export default function ExamPage() {
 function SaveStatusBadge({ status }: { status?: SaveStatus }) {
   if (!status) return null;
   if (status === "saving") {
-    return <p className="mt-1 text-xs text-slate-400">جارٍ الحفظ...</p>;
+    return <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">جارٍ الحفظ...</p>;
   }
   if (status === "error") {
-    return <p className="mt-1 text-xs font-medium text-red-600">تعذر الحفظ، ستتم إعادة المحاولة تلقائياً</p>;
+    return (
+      <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
+        تعذر الحفظ، ستتم إعادة المحاولة تلقائياً
+      </p>
+    );
   }
   return (
-    <p className="mt-1 flex items-center gap-1 text-xs font-medium text-green-600">
+    <p className="mt-1 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
       <Icon name="check" size={12} />
       تم الحفظ
     </p>
@@ -467,7 +474,13 @@ function SaveStatusBadge({ status }: { status?: SaveStatus }) {
 function CenteredMessage({ text, isError }: { text: string; isError?: boolean }) {
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <p className={`text-center text-lg ${isError ? "text-red-600" : "text-slate-600"}`}>{text}</p>
+      <p
+        className={`text-center text-lg ${
+          isError ? "text-red-600 dark:text-red-400" : "text-slate-600 dark:text-slate-400"
+        }`}
+      >
+        {text}
+      </p>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import QuickJoinButton from "@/components/QuickJoinButton";
 import ScoreFraction from "@/components/ScoreFraction";
 import Icon from "@/components/brand/Icon";
 import OrgLogo from "@/components/brand/OrgLogo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const attendanceStatusLabels: Record<string, string> = {
   PRESENT: "حاضر",
@@ -73,36 +74,41 @@ export default async function StudentPortalPage({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
-      <div className="flex items-center gap-3">
-        <OrgLogo size={48} />
-        <div>
-          <h1 className="text-2xl font-bold text-brand-navy-dark">أهلاً {student.fullName}</h1>
-          <p className="text-sm text-slate-500">{student.classSection.name}</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <OrgLogo size={48} />
+          <div>
+            <h1 className="text-2xl font-bold text-brand-navy-dark dark:text-slate-100">
+              أهلاً {student.fullName}
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{student.classSection.name}</p>
+          </div>
         </div>
+        <ThemeToggle />
       </div>
 
       {breakdown && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-brand-panel p-4 text-center">
-            <p className="text-xs text-brand-navy-dark">ترتيبك في الشعبة</p>
-            <p className="mt-1 text-xl font-bold text-brand-navy-dark">
+          <div className="rounded-2xl bg-brand-panel p-4 text-center dark:bg-slate-800">
+            <p className="text-xs text-brand-navy-dark dark:text-blue-300">ترتيبك في الشعبة</p>
+            <p className="mt-1 text-xl font-bold text-brand-navy-dark dark:text-slate-100">
               {position + 1} من {ranking.length}
             </p>
           </div>
-          <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
-            <p className="text-xs text-slate-500">المعدل العام</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">{pct(breakdown.overallPct)}</p>
+          <div className="rounded-2xl bg-white p-4 text-center shadow-sm dark:bg-slate-800">
+            <p className="text-xs text-slate-500 dark:text-slate-400">المعدل العام</p>
+            <p className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">{pct(breakdown.overallPct)}</p>
           </div>
-          <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
-            <p className="text-xs text-slate-500">الحضور</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">{pct(breakdown.attendancePct)}</p>
+          <div className="rounded-2xl bg-white p-4 text-center shadow-sm dark:bg-slate-800">
+            <p className="text-xs text-slate-500 dark:text-slate-400">الحضور</p>
+            <p className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">{pct(breakdown.attendancePct)}</p>
           </div>
         </div>
       )}
 
       {availableExams.length > 0 && (
-        <div className="rounded-2xl bg-brand-panel p-5">
-          <h2 className="flex items-center gap-2 font-semibold text-brand-navy-dark">
+        <div className="rounded-2xl bg-brand-panel p-5 dark:bg-slate-800">
+          <h2 className="flex items-center gap-2 font-semibold text-brand-navy-dark dark:text-slate-100">
             <Icon name="clipboard" size={17} />
             امتحانات متاحة لك
           </h2>
@@ -110,11 +116,11 @@ export default async function StudentPortalPage({
             {availableExams.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-sm"
+                className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-sm dark:bg-slate-700"
               >
                 <div>
-                  <p className="font-medium text-slate-900">{c.exam.title}</p>
-                  <p className="text-xs text-slate-500">{c.exam.durationMinutes} دقيقة</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{c.exam.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{c.exam.durationMinutes} دقيقة</p>
                 </div>
                 <QuickJoinButton
                   code={c.code}
@@ -129,23 +135,23 @@ export default async function StudentPortalPage({
       )}
 
       {upcomingExams.length > 0 && (
-        <div className="rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-            <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+        <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+            <Icon name="calendarCheck" size={17} className="text-brand-blue dark:text-blue-400" />
             امتحاناتي القادمة
           </h2>
           <div className="mt-3 flex flex-col gap-3">
             {upcomingExams.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-xl bg-brand-panel/40 p-3"
+                className="flex items-center justify-between gap-3 rounded-xl bg-brand-panel/40 p-3 dark:bg-slate-700/40"
               >
                 <div>
-                  <p className="font-medium text-slate-900">{c.exam.title}</p>
-                  <p className="text-xs text-slate-500">{c.exam.durationMinutes} دقيقة</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{c.exam.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{c.exam.durationMinutes} دقيقة</p>
                 </div>
                 <div className="text-left">
-                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                     يفتح في {new Date(c.exam.opensAt!).toLocaleString("ar", {
                       dateStyle: "medium",
                       timeStyle: "short",
@@ -158,27 +164,27 @@ export default async function StudentPortalPage({
         </div>
       )}
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-          <Icon name="scale" size={17} className="text-brand-blue" />
+      <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+          <Icon name="scale" size={17} className="text-brand-blue dark:text-blue-400" />
           نتائج الامتحانات
         </h2>
         {finishedExams.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">لا توجد نتائج بعد.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">لا توجد نتائج بعد.</p>
         ) : (
           <table className="mt-3 w-full text-sm">
             <tbody>
               {finishedExams.map((c) => (
-                <tr key={c.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-2 py-2">{c.exam.title}</td>
-                  <td className="px-2 py-2 text-left text-slate-600">
+                <tr key={c.id} className="border-b border-slate-100 last:border-0 dark:border-slate-700">
+                  <td className="px-2 py-2 dark:text-slate-200">{c.exam.title}</td>
+                  <td className="px-2 py-2 text-left text-slate-600 dark:text-slate-400">
                     <ScoreFraction score={c.attempt!.score} max={c.attempt!.maxScore} />
                   </td>
                   <td className="px-2 py-2 text-left">
                     {c.exam.resultsPublished && (
                       <Link
                         href={`/student/${token}/review/${c.attempt!.id}`}
-                        className="text-xs font-medium text-brand-blue hover:underline"
+                        className="text-xs font-medium text-brand-blue hover:underline dark:text-blue-400"
                       >
                         عرض التفاصيل
                       </Link>
@@ -191,28 +197,28 @@ export default async function StudentPortalPage({
         )}
       </div>
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-          <Icon name="bulb" size={17} className="text-brand-blue" />
+      <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+          <Icon name="bulb" size={17} className="text-brand-blue dark:text-blue-400" />
           درجات أخرى ومشاريع
         </h2>
         {student.manualGrades.length === 0 && student.projectGrades.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">لا توجد درجات بعد.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">لا توجد درجات بعد.</p>
         ) : (
           <table className="mt-3 w-full text-sm">
             <tbody>
               {student.manualGrades.map((g) => (
-                <tr key={g.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-2 py-2">{g.title}</td>
-                  <td className="px-2 py-2 text-left text-slate-600">
+                <tr key={g.id} className="border-b border-slate-100 last:border-0 dark:border-slate-700">
+                  <td className="px-2 py-2 dark:text-slate-200">{g.title}</td>
+                  <td className="px-2 py-2 text-left text-slate-600 dark:text-slate-400">
                     <ScoreFraction score={g.score} max={g.maxScore} />
                   </td>
                 </tr>
               ))}
               {student.projectGrades.map((g) => (
-                <tr key={g.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-2 py-2">{g.project.title}</td>
-                  <td className="px-2 py-2 text-left text-slate-600">
+                <tr key={g.id} className="border-b border-slate-100 last:border-0 dark:border-slate-700">
+                  <td className="px-2 py-2 dark:text-slate-200">{g.project.title}</td>
+                  <td className="px-2 py-2 text-left text-slate-600 dark:text-slate-400">
                     <ScoreFraction score={g.score} max={g.project.maxScore} />
                   </td>
                 </tr>
@@ -222,22 +228,22 @@ export default async function StudentPortalPage({
         )}
       </div>
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-          <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+      <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+          <Icon name="calendarCheck" size={17} className="text-brand-blue dark:text-blue-400" />
           سجل الحضور
         </h2>
         {student.attendanceRecords.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">لا يوجد سجل حضور بعد.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">لا يوجد سجل حضور بعد.</p>
         ) : (
           <table className="mt-3 w-full text-sm">
             <tbody>
               {student.attendanceRecords.map((r) => (
-                <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-2 py-2">
+                <tr key={r.id} className="border-b border-slate-100 last:border-0 dark:border-slate-700">
+                  <td className="px-2 py-2 dark:text-slate-200">
                     {r.session.title || new Date(r.session.date).toLocaleDateString("ar")}
                   </td>
-                  <td className="px-2 py-2 text-left text-slate-600">
+                  <td className="px-2 py-2 text-left text-slate-600 dark:text-slate-400">
                     {attendanceStatusLabels[r.status]}
                   </td>
                 </tr>

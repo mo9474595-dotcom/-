@@ -34,7 +34,10 @@ export default async function StudentExamReviewPage({
   return (
     <div className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-3xl px-4 pt-6">
-        <Link href={`/student/${token}`} className="text-sm font-medium text-brand-blue hover:underline">
+        <Link
+          href={`/student/${token}`}
+          className="text-sm font-medium text-brand-blue hover:underline dark:text-blue-400"
+        >
           ← العودة إلى بوابتي
         </Link>
       </div>
@@ -42,8 +45,8 @@ export default async function StudentExamReviewPage({
         <ExamReviewView data={review.data} />
       ) : (
         <div className="flex flex-1 items-center justify-center px-4 py-16">
-          <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-            <p className="text-sm text-slate-600">{messages[review.reason]}</p>
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg dark:bg-slate-800">
+            <p className="text-sm text-slate-600 dark:text-slate-400">{messages[review.reason]}</p>
           </div>
         </div>
       )}

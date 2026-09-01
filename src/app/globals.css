@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/*
+ * Manual dark mode (student-facing pages only — see ThemeToggle). Activated
+ * by [data-theme="dark"] on <html>, set by the toggle and persisted to
+ * localStorage; never auto-derived from OS preference, so a teacher never
+ * lands in dark mode without having deliberately clicked the toggle
+ * themselves on a student page in the same browser.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #f6f7fb;
   --foreground: #101828;
@@ -12,6 +21,11 @@
   --brand-green-dark: #036b30;
   --brand-panel: #dcf0f7;
   --brand-page-tint: #dce3ed;
+}
+
+:root[data-theme="dark"] {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
 }
 
 @theme inline {

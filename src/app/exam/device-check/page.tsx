@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import AppHeader from "@/components/brand/AppHeader";
 import Icon from "@/components/brand/Icon";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type CheckStatus = "pending" | "pass" | "warn" | "fail";
 
@@ -16,13 +17,13 @@ type CheckResult = {
 function statusStyles(status: CheckStatus) {
   switch (status) {
     case "pass":
-      return { bg: "bg-green-100", text: "text-green-700", icon: "check" as const };
+      return { bg: "bg-green-100 dark:bg-green-900/40", text: "text-green-700 dark:text-green-300", icon: "check" as const };
     case "warn":
-      return { bg: "bg-amber-100", text: "text-amber-700", icon: "shield" as const };
+      return { bg: "bg-amber-100 dark:bg-amber-900/40", text: "text-amber-700 dark:text-amber-300", icon: "shield" as const };
     case "fail":
-      return { bg: "bg-red-100", text: "text-red-700", icon: "shield" as const };
+      return { bg: "bg-red-100 dark:bg-red-900/40", text: "text-red-700 dark:text-red-300", icon: "shield" as const };
     default:
-      return { bg: "bg-slate-100", text: "text-slate-500", icon: "clock" as const };
+      return { bg: "bg-slate-100 dark:bg-slate-700", text: "text-slate-500 dark:text-slate-400", icon: "clock" as const };
   }
 }
 
@@ -121,18 +122,22 @@ export default function DeviceCheckPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <AppHeader title="تجربة الجهاز قبل الامتحان" icon={<Icon name="laptop" size={18} />} />
+      <AppHeader
+        title="تجربة الجهاز قبل الامتحان"
+        icon={<Icon name="laptop" size={18} />}
+        rightExtra={<ThemeToggle />}
+      />
 
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-brand-page-tint px-4 py-16">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-brand-page-tint px-4 py-16 dark:bg-slate-900">
         <div className="brand-dot-grid pointer-events-none absolute right-16 top-16 hidden h-28 w-40 text-brand-blue/20 sm:block" />
         <div className="brand-ring pointer-events-none absolute -left-16 top-1/3 hidden h-44 w-44 border-emerald-400/40 sm:block" />
 
-        <div className="relative w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+        <div className="relative w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg dark:bg-slate-800">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue dark:bg-slate-700 dark:text-blue-300">
             <Icon name="laptop" size={24} />
           </div>
-          <h1 className="text-center text-xl font-bold text-brand-navy-dark">تحقّق من جهازك قبل الامتحان</h1>
-          <p className="mt-1 text-center text-sm text-slate-500">
+          <h1 className="text-center text-xl font-bold text-brand-navy-dark dark:text-slate-100">تحقّق من جهازك قبل الامتحان</h1>
+          <p className="mt-1 text-center text-sm text-slate-500 dark:text-slate-400">
             هذه الصفحة تفحص جاهزية متصفحك وجهازك فقط — لا علاقة لها بأي امتحان حقيقي، ولا تُسجَّل أي بيانات.
           </p>
 
@@ -151,13 +156,13 @@ export default function DeviceCheckPage() {
               {results.map((r) => {
                 const s = statusStyles(r.status);
                 return (
-                  <div key={r.label} className="flex items-start gap-3 rounded-xl bg-brand-panel/40 p-3">
+                  <div key={r.label} className="flex items-start gap-3 rounded-xl bg-brand-panel/40 p-3 dark:bg-slate-700/40">
                     <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${s.bg} ${s.text}`}>
                       <Icon name={s.icon} size={16} />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{r.label}</p>
-                      <p className="mt-0.5 text-xs text-slate-600">{r.detail}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{r.label}</p>
+                      <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{r.detail}</p>
                     </div>
                   </div>
                 );
@@ -165,7 +170,9 @@ export default function DeviceCheckPage() {
 
               <div
                 className={`mt-2 rounded-xl px-4 py-3 text-center text-sm font-semibold ${
-                  overallFail ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
+                  overallFail
+                    ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                    : "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300"
                 }`}
               >
                 {overallFail
@@ -175,7 +182,7 @@ export default function DeviceCheckPage() {
 
               <button
                 onClick={() => setResults(null)}
-                className="mt-1 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="mt-1 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 إعادة الفحص
               </button>
@@ -184,7 +191,7 @@ export default function DeviceCheckPage() {
 
           <Link
             href="/exam/join"
-            className="mt-4 block text-center text-sm font-medium text-brand-blue hover:underline"
+            className="mt-4 block text-center text-sm font-medium text-brand-blue hover:underline dark:text-blue-400"
           >
             العودة إلى صفحة دخول الامتحان
           </Link>

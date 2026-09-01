@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Icon from "@/components/brand/Icon";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Student = { id: string; fullName: string; studentRef: string | null };
 
@@ -85,26 +86,27 @@ function CheckinForm() {
   );
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue">
+    <div className="relative flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16 dark:bg-slate-900">
+      <ThemeToggle className="absolute right-4 top-4" />
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg dark:bg-slate-800">
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-panel text-brand-blue dark:bg-slate-700 dark:text-blue-300">
           <Icon name="calendarCheck" size={22} />
         </div>
-        <h1 className="text-center text-xl font-bold text-brand-navy-dark">تسجيل الحضور</h1>
+        <h1 className="text-center text-xl font-bold text-brand-navy-dark dark:text-slate-100">تسجيل الحضور</h1>
 
         {phase === "code" || phase === "error" ? (
           <form onSubmit={loadCode} className="mt-6 flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-slate-700">رمز الحضور</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">رمز الحضور</label>
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
                 placeholder="XXXXXX"
-                className="rounded-xl border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-widest outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+                className="rounded-xl border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-widest outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
               />
             </div>
-            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>}
             <button
               type="submit"
               disabled={loading}
@@ -115,7 +117,7 @@ function CheckinForm() {
           </form>
         ) : phase === "pick" ? (
           <div className="mt-6 flex flex-col gap-4">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {className}
               {sessionTitle && ` — ${sessionTitle}`}
             </p>
@@ -123,31 +125,31 @@ function CheckinForm() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="ابحث عن اسمك..."
-              className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
+              className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
             />
-            <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200">
+            <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700">
               {filtered.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => checkin(s.id)}
                   disabled={loading}
-                  className="block w-full border-b border-slate-100 px-3 py-2 text-right text-sm last:border-0 hover:bg-brand-panel disabled:opacity-60"
+                  className="block w-full border-b border-slate-100 px-3 py-2 text-right text-sm last:border-0 hover:bg-brand-panel disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
                 >
                   {s.fullName}
                   {s.studentRef && (
-                    <span className="text-xs text-slate-400"> · {s.studentRef}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500"> · {s.studentRef}</span>
                   )}
                 </button>
               ))}
               {filtered.length === 0 && (
-                <p className="px-3 py-4 text-center text-sm text-slate-500">لا توجد نتائج</p>
+                <p className="px-3 py-4 text-center text-sm text-slate-500 dark:text-slate-400">لا توجد نتائج</p>
               )}
             </div>
-            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>}
           </div>
         ) : (
-          <div className="mt-6 rounded-lg bg-green-50 px-4 py-6 text-center">
-            <p className="font-semibold text-green-800">{resultMessage}</p>
+          <div className="mt-6 rounded-lg bg-green-50 px-4 py-6 text-center dark:bg-green-950/40">
+            <p className="font-semibold text-green-800 dark:text-green-300">{resultMessage}</p>
           </div>
         )}
       </div>

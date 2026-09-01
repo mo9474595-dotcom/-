@@ -4,9 +4,11 @@ import OrgLogo from "./OrgLogo";
 export default function AppHeader({
   title,
   icon,
+  rightExtra,
 }: {
   title: string;
   icon?: ReactNode;
+  rightExtra?: ReactNode;
 }) {
   return (
     <header className="brand-header-gradient relative overflow-hidden">
@@ -30,6 +32,7 @@ export default function AppHeader({
           ) : null}
         </div>
         <div className="flex items-center gap-3">
+          {rightExtra}
           <div className="hidden text-right sm:block">
             <p className="text-sm font-bold text-white">منظمة رياض النجاح</p>
             <p className="text-xs text-white/80">للتنمية المستدامة</p>

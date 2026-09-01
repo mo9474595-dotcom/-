@@ -26,6 +26,8 @@ const PATHS: Record<string, string> = {
   check: "M5 12l5 5L20 7",
   save: "M5 4h11l3 3v13H5V4Zm3 0v5h8V4M8 13h8v7H8v-7Z",
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm9 2-4.3-4.3",
+  moon: "M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11Z",
+  sun: "M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M18.4 5.6l1.4-1.4M4.2 19.8l1.4-1.4M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
 };
 
 export default function Icon({
