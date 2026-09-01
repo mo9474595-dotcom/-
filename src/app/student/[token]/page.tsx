@@ -53,8 +53,19 @@ export default async function StudentPortalPage({
   const position = ranking.findIndex((r) => r.studentId === student.id);
   const breakdown = position >= 0 ? ranking[position] : null;
 
-  const availableExams = student.examCodes.filter(
+  const now = new Date();
+  const eligibleExams = student.examCodes.filter(
     (c) => c.exam.isPublished && (!c.attempt || c.attempt.status === "IN_PROGRESS")
+  );
+  // An already-started attempt can always be continued regardless of the
+  // opens/closes window — that window only gates the initial join.
+  const availableExams = eligibleExams.filter(
+    (c) =>
+      c.attempt?.status === "IN_PROGRESS" ||
+      ((!c.exam.opensAt || c.exam.opensAt <= now) && (!c.exam.closesAt || c.exam.closesAt >= now))
+  );
+  const upcomingExams = eligibleExams.filter(
+    (c) => !c.attempt && c.exam.opensAt && c.exam.opensAt > now
   );
   const finishedExams = student.examCodes.filter(
     (c) => c.attempt && c.attempt.status !== "IN_PROGRESS"
@@ -111,6 +122,36 @@ export default async function StudentPortalPage({
                   studentRef={student.studentRef}
                   label={c.attempt ? "متابعة الامتحان" : "ابدأ الامتحان"}
                 />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {upcomingExams.length > 0 && (
+        <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            <Icon name="calendarCheck" size={17} className="text-brand-blue" />
+            امتحاناتي القادمة
+          </h2>
+          <div className="mt-3 flex flex-col gap-3">
+            {upcomingExams.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between gap-3 rounded-xl bg-brand-panel/40 p-3"
+              >
+                <div>
+                  <p className="font-medium text-slate-900">{c.exam.title}</p>
+                  <p className="text-xs text-slate-500">{c.exam.durationMinutes} دقيقة</p>
+                </div>
+                <div className="text-left">
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                    يفتح في {new Date(c.exam.opensAt!).toLocaleString("ar", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
