@@ -101,6 +101,34 @@ export function isAdminEmail(email: string): boolean {
     .includes(normalized);
 }
 
+/**
+ * For a teaching-assistant account (Teacher.ownerId set), returns the
+ * owning teacher's id — the account whose classes/exams/students the
+ * assistant is meant to work within. For any regular teacher account
+ * (ownerId null), returns their own id unchanged, so this is a no-op for
+ * every existing caller. Only call this from the small set of routes that
+ * are deliberately opened up to assistants (grading, feedback snippets,
+ * the assistant's own read-only dashboard) — everywhere else keep using
+ * requireTeacherId() directly so an assistant's access stays scoped to
+ * exactly that allowlist.
+ */
+export async function resolveScopeTeacherId(teacherId: string): Promise<string> {
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { ownerId: true },
+  });
+  return teacher?.ownerId ?? teacherId;
+}
+
+/** True if this account is a teaching assistant (works within another teacher's data). */
+export async function isAssistantAccount(teacherId: string): Promise<boolean> {
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { ownerId: true },
+  });
+  return teacher?.ownerId != null;
+}
+
 export class ForbiddenAdminError extends Error {}
 
 /** Returns the authenticated admin's teacher id, or throws. */

@@ -53,6 +53,15 @@ model Teacher {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // Set only on a teaching-assistant account: logs in through the exact
+  // same login form as any other teacher, but everything it can see/do is
+  // scoped to the owning teacher's data (see resolveScopeTeacherId in
+  // lib/auth.ts) rather than its own — an assistant never owns classes or
+  // exams itself. An assistant cannot itself own further assistants.
+  ownerId    String?
+  owner      Teacher?  @relation("TeacherAssistants", fields: [ownerId], references: [id], onDelete: Cascade)
+  assistants Teacher[] @relation("TeacherAssistants")
+
   exams            Exam[]
   classSections    ClassSection[]
   auditLogs        AuditLog[]

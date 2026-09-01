@@ -20,10 +20,16 @@ export default async function TeacherAppLayout({
 
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: { name: true, email: true },
+    select: { name: true, email: true, ownerId: true },
   });
   if (!teacher) {
     redirect("/teacher/login");
+  }
+
+  // A teaching-assistant account never reaches the full teacher app — its
+  // access is limited to its own dedicated (much smaller) area.
+  if (teacher.ownerId) {
+    redirect("/teacher/assistant");
   }
 
   const isAdmin = isAdminEmail(teacher.email);

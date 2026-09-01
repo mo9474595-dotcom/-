@@ -12,7 +12,8 @@ type IconName =
   | "folder"
   | "scale"
   | "shield"
-  | "calendarCheck";
+  | "calendarCheck"
+  | "userPlus";
 
 const ITEMS: { href: string; label: string; icon: IconName }[] = [
   { href: "/teacher/dashboard", label: "الامتحانات", icon: "clipboard" },
@@ -20,6 +21,7 @@ const ITEMS: { href: string; label: string; icon: IconName }[] = [
   { href: "/teacher/calendar", label: "التقويم", icon: "calendarCheck" },
   { href: "/teacher/question-bank", label: "بنك الأسئلة", icon: "folder" },
   { href: "/teacher/statistics", label: "الإحصائيات", icon: "scale" },
+  { href: "/teacher/assistants", label: "المساعدون", icon: "userPlus" },
   { href: "/teacher/audit-log", label: "سجل التعديلات", icon: "clockHistory" },
   { href: "/teacher/trash", label: "سلة المحذوفات", icon: "trash" },
 ];

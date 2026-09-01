@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireTeacherId } from "@/lib/auth";
+import { requireTeacherId, resolveScopeTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { getOwnedAttempt } from "@/lib/exams";
 import { recomputeAttemptScore } from "@/lib/grading";
@@ -17,7 +17,11 @@ const gradeSchema = z.object({
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
-    const teacherId = await requireTeacherId();
+    // A teaching assistant grades on behalf of the owning teacher — scope
+    // the ownership check to the owner, but keep the assistant's own id
+    // separately so the audit trail still credits the actual actor.
+    const actorId = await requireTeacherId();
+    const teacherId = await resolveScopeTeacherId(actorId);
     const { attemptId } = await params;
     const attempt = await getOwnedAttempt(teacherId, attemptId);
 
@@ -51,10 +55,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const score = await recomputeAttemptScore(attemptId);
 
+    const actorPrefix =
+      actorId !== teacherId
+        ? `(المساعد ${(await prisma.teacher.findUnique({ where: { id: actorId }, select: { name: true } }))?.name ?? "؟"}) `
+        : "";
     await logAudit({
       teacherId,
       action: "ATTEMPT_ANSWER_GRADE_SET",
-      summary: `صحّح إجابة (${capped}/${answer.question.points}) لـ${attempt.studentName} في "${attempt.exam.title}"`,
+      summary: `${actorPrefix}صحّح إجابة (${capped}/${answer.question.points}) لـ${attempt.studentName} في "${attempt.exam.title}"`,
       examId: attempt.examId,
     });
 

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireTeacherId } from "@/lib/auth";
+import { requireTeacherId, resolveScopeTeacherId } from "@/lib/auth";
 import { handleApiError } from "@/lib/api-utils";
 import { z } from "zod";
 
 export async function GET() {
   try {
-    const teacherId = await requireTeacherId();
+    // A teaching assistant shares the owning teacher's snippet library
+    // rather than having their own separate, empty one.
+    const teacherId = await resolveScopeTeacherId(await requireTeacherId());
     const snippets = await prisma.feedbackSnippet.findMany({
       where: { teacherId },
       orderBy: { createdAt: "desc" },
@@ -23,7 +25,7 @@ const createSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const teacherId = await requireTeacherId();
+    const teacherId = await resolveScopeTeacherId(await requireTeacherId());
     const body = await req.json().catch(() => null);
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {

@@ -26,9 +26,11 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 export default function ResultsTableClient({
   examId,
   attempts,
+  basePath = "/teacher/exams",
 }: {
   examId: string;
   attempts: Attempt[];
+  basePath?: string;
 }) {
   const { query, setQuery, page, setPage, pageCount, pageItems, totalCount, pageSize } =
     usePagedSearch(attempts, (a, q) => a.studentName.toLowerCase().includes(q));
@@ -88,7 +90,7 @@ export default function ResultsTableClient({
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/teacher/exams/${examId}/results/${a.id}`}
+                      href={`${basePath}/${examId}/results/${a.id}`}
                       className="flex items-center gap-1 rounded-full bg-brand-panel px-3 py-1 text-xs font-medium text-brand-blue hover:bg-blue-100"
                     >
                       <Icon name="search" size={12} />
