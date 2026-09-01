@@ -17,6 +17,7 @@ const typeLabels: Record<string, string> = {
   MULTIPLE_CHOICE: "اختيار من متعدد",
   TRUE_FALSE: "صح أو خطأ",
   SHORT_ANSWER: "إجابة قصيرة",
+  AUDIO_ANSWER: "إجابة صوتية",
 };
 
 export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) {
@@ -303,7 +304,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
                       className="mt-2 max-h-32 rounded-lg border border-slate-200 object-contain"
                     />
                   )}
-                  {q.type !== "SHORT_ANSWER" && (
+                  {q.type !== "SHORT_ANSWER" && q.type !== "AUDIO_ANSWER" && (
                     <ul className="mt-2 flex flex-col gap-1 text-sm text-slate-600">
                       {q.choices.map((c) => (
                         <li key={c.id} className={c.isCorrect ? "font-semibold text-green-700" : ""}>

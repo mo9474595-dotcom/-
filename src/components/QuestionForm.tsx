@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type QuestionType = "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER";
+export type QuestionType = "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER" | "AUDIO_ANSWER";
 
 export type QuestionFormValue = {
   type: QuestionType;
@@ -157,6 +157,7 @@ export default function QuestionForm({
             <option value="MULTIPLE_CHOICE">اختيار من متعدد</option>
             <option value="TRUE_FALSE">صح أو خطأ</option>
             <option value="SHORT_ANSWER">إجابة قصيرة (تصحيح يدوي)</option>
+            <option value="AUDIO_ANSWER">إجابة صوتية (تصحيح يدوي)</option>
           </select>
         </div>
         <div className="flex flex-col gap-1">
@@ -297,6 +298,12 @@ export default function QuestionForm({
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
           />
         </div>
+      )}
+
+      {value.type === "AUDIO_ANSWER" && (
+        <p className="text-xs text-slate-500">
+          يسجّل الطالب إجابته صوتياً بدل الكتابة، وتستمع إليها وتمنح الدرجة يدوياً بعد التسليم.
+        </p>
       )}
 
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}

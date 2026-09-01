@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { questionId, selectedChoiceId, textAnswer } = parsed.data;
+    const { questionId, selectedChoiceId, textAnswer, audioUrl } = parsed.data;
 
     const question = await prisma.question.findUnique({
       where: { id: questionId },
@@ -47,9 +47,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       validatedChoiceId = choice.id;
       isCorrect = choice.isCorrect;
       pointsAwarded = choice.isCorrect ? question.points : 0;
-    } else {
-      // SHORT_ANSWER: exact case-insensitive match auto-grades; anything
-      // else is left for the teacher to grade manually.
+    } else if (question.type === "SHORT_ANSWER") {
+      // Exact case-insensitive match auto-grades; anything else is left
+      // for the teacher to grade manually.
       const trimmed = (textAnswer ?? "").trim();
       if (question.correctAnswer && trimmed) {
         const matches =
@@ -60,6 +60,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         }
       }
     }
+    // AUDIO_ANSWER always needs the teacher to listen and grade manually —
+    // there's nothing to auto-match a recording against.
 
     const answer = await prisma.answer.upsert({
       where: { attemptId_questionId: { attemptId, questionId } },
@@ -68,12 +70,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         questionId,
         selectedChoiceId: validatedChoiceId,
         textAnswer: question.type === "SHORT_ANSWER" ? textAnswer ?? null : null,
+        audioUrl: question.type === "AUDIO_ANSWER" ? audioUrl ?? null : null,
         isCorrect,
         pointsAwarded,
       },
       update: {
         selectedChoiceId: validatedChoiceId,
         textAnswer: question.type === "SHORT_ANSWER" ? textAnswer ?? null : null,
+        audioUrl: question.type === "AUDIO_ANSWER" ? audioUrl ?? null : null,
         isCorrect,
         pointsAwarded,
       },

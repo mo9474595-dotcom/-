@@ -55,6 +55,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
             .map((c) => ({ id: c.id, text: c.text })),
           savedSelectedChoiceId: existingAnswer?.selectedChoiceId ?? null,
           savedTextAnswer: existingAnswer?.textAnswer ?? null,
+          savedAudioUrl: existingAnswer?.audioUrl ?? null,
         };
       });
 

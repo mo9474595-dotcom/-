@@ -10,6 +10,7 @@ const typeLabels: Record<string, string> = {
   MULTIPLE_CHOICE: "اختيار من متعدد",
   TRUE_FALSE: "صح أو خطأ",
   SHORT_ANSWER: "إجابة قصيرة",
+  AUDIO_ANSWER: "إجابة صوتية",
 };
 
 export default function BankQuestionPicker({

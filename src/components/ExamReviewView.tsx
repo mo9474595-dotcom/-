@@ -7,6 +7,7 @@ const typeLabels: Record<string, string> = {
   MULTIPLE_CHOICE: "اختيار من متعدد",
   TRUE_FALSE: "صح أو خطأ",
   SHORT_ANSWER: "إجابة قصيرة",
+  AUDIO_ANSWER: "إجابة صوتية",
 };
 
 export default function ExamReviewView({ data }: { data: AttemptReview }) {
@@ -28,7 +29,7 @@ export default function ExamReviewView({ data }: { data: AttemptReview }) {
 
       <div className="flex flex-col gap-3">
         {data.questions.map((q, i) => {
-          const isShortAnswer = q.type === "SHORT_ANSWER";
+          const isChoiceType = q.type === "MULTIPLE_CHOICE" || q.type === "TRUE_FALSE";
           const graded = q.pointsAwarded != null;
           return (
             <div key={q.id} className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
@@ -50,7 +51,7 @@ export default function ExamReviewView({ data }: { data: AttemptReview }) {
                 />
               )}
 
-              {!isShortAnswer ? (
+              {isChoiceType ? (
                 <div className="mt-3 flex flex-col gap-1.5 text-sm">
                   {q.choices.map((c) => {
                     const chosen = c.id === q.selectedChoiceId;
@@ -87,9 +88,17 @@ export default function ExamReviewView({ data }: { data: AttemptReview }) {
                 <div className="mt-3 flex flex-col gap-2 text-sm">
                   <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-700/40">
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400">إجابتك</p>
-                    <p className="mt-0.5 text-slate-800 dark:text-slate-200">
-                      {q.textAnswer?.trim() ? q.textAnswer : "— لم تُجب —"}
-                    </p>
+                    {q.type === "AUDIO_ANSWER" ? (
+                      q.audioUrl ? (
+                        <audio controls src={q.audioUrl} className="mt-1 w-full" />
+                      ) : (
+                        <p className="mt-0.5 text-slate-800 dark:text-slate-200">— لم تُجب —</p>
+                      )
+                    ) : (
+                      <p className="mt-0.5 text-slate-800 dark:text-slate-200">
+                        {q.textAnswer?.trim() ? q.textAnswer : "— لم تُجب —"}
+                      </p>
+                    )}
                   </div>
                   {q.correctAnswer && (
                     <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 dark:border-green-700 dark:bg-green-950/40">

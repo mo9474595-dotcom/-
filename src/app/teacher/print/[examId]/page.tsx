@@ -76,7 +76,7 @@ export default async function ExamPrintPage({
               />
             )}
 
-            {q.type !== "SHORT_ANSWER" ? (
+            {q.type !== "SHORT_ANSWER" && q.type !== "AUDIO_ANSWER" ? (
               <div className="mt-2 flex flex-col gap-1.5 pr-4">
                 {q.choices.map((c, ci) => {
                   const isCorrect = withAnswers && c.isCorrect;
@@ -98,6 +98,10 @@ export default async function ExamPrintPage({
                   );
                 })}
               </div>
+            ) : q.type === "AUDIO_ANSWER" ? (
+              <p className="mt-2 pr-4 text-sm text-slate-500">
+                (سؤال بإجابة صوتية — غير متاح على النسخة المطبوعة، يُجاب عليه إلكترونياً فقط)
+              </p>
             ) : (
               <div className="mt-2 flex flex-col gap-3 pr-4">
                 <div className="h-6 border-b border-dotted border-slate-400" />

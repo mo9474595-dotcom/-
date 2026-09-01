@@ -19,7 +19,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
         examCode: { select: { code: true } },
         _count: { select: { cheatLogs: true } },
         answers: {
-          where: { question: { type: "SHORT_ANSWER" } },
+          where: { question: { type: { in: ["SHORT_ANSWER", "AUDIO_ANSWER"] } } },
           select: { id: true, pointsAwarded: true },
         },
       },

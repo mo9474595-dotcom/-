@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 export type QuestionReview = {
   id: string;
-  type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER";
+  type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER" | "AUDIO_ANSWER";
   text: string;
   imageUrl: string | null;
   points: number;
@@ -11,6 +11,7 @@ export type QuestionReview = {
   choices: { id: string; text: string; isCorrect: boolean }[];
   selectedChoiceId: string | null;
   textAnswer: string | null;
+  audioUrl: string | null;
   correctAnswer: string | null;
   feedback: string | null;
 };
@@ -90,6 +91,7 @@ export async function getAttemptReview(attemptId: string): Promise<AttemptReview
           .map((c) => ({ id: c.id, text: c.text, isCorrect: c.isCorrect })),
         selectedChoiceId: answer?.selectedChoiceId ?? null,
         textAnswer: answer?.textAnswer ?? null,
+        audioUrl: answer?.audioUrl ?? null,
         correctAnswer: q.type === "SHORT_ANSWER" ? q.correctAnswer : null,
         feedback: answer?.feedback ?? null,
       };

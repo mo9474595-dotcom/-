@@ -73,7 +73,7 @@ const questionImageUrl = z
   .or(z.literal(""));
 
 export const questionSchema = z.object({
-  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]),
+  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER", "AUDIO_ANSWER"]),
   text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000),
   points: z.coerce.number().int().min(1).max(100).default(1),
   correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
@@ -86,7 +86,7 @@ export const questionSchema = z.object({
 // any edit that doesn't touch it (e.g. just editing the text). Redefined
 // without .default() so an omitted field parses to undefined.
 export const questionUpdateSchema = z.object({
-  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]).optional(),
+  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER", "AUDIO_ANSWER"]).optional(),
   text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000).optional(),
   points: z.coerce.number().int().min(1).max(100).optional(),
   correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
@@ -111,10 +111,22 @@ export const joinExamSchema = z.object({
   studentRef: z.string().trim().max(100).optional().or(z.literal("")),
 });
 
+// A data: URL recorded client-side (MediaRecorder, opus/webm) — capped well
+// above what a ~2-minute recording at a modest bitrate produces, as a
+// safety net against a request built outside the exam page's own recorder.
+const answerAudioUrl = z
+  .string()
+  .trim()
+  .max(4_000_000, "التسجيل الصوتي كبير جداً")
+  .refine((v) => v === "" || v.startsWith("data:audio/"), "صيغة التسجيل غير صالحة")
+  .optional()
+  .or(z.literal(""));
+
 export const answerSchema = z.object({
   questionId: z.string().min(1),
   selectedChoiceId: z.string().min(1).optional(),
   textAnswer: z.string().max(5000).optional(),
+  audioUrl: answerAudioUrl,
 });
 
 export const classSectionSchema = z.object({

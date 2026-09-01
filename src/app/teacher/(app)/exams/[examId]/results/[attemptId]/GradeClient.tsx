@@ -77,7 +77,7 @@ export default function GradeClient({
               />
             )}
 
-            {question.type !== "SHORT_ANSWER" ? (
+            {question.type !== "SHORT_ANSWER" && question.type !== "AUDIO_ANSWER" ? (
               <div className="mt-2 flex flex-col gap-1 text-sm">
                 {question.choices.map((c) => {
                   const chosen = answer?.selectedChoiceId === c.id;
@@ -102,9 +102,17 @@ export default function GradeClient({
               </div>
             ) : (
               <div className="mt-2 flex flex-col gap-2">
-                <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                  {answer?.textAnswer || <span className="text-slate-400">لم يُجب</span>}
-                </p>
+                {question.type === "AUDIO_ANSWER" ? (
+                  answer?.audioUrl ? (
+                    <audio controls src={answer.audioUrl} className="w-full" />
+                  ) : (
+                    <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-400">لم يُجب</p>
+                  )
+                ) : (
+                  <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                    {answer?.textAnswer || <span className="text-slate-400">لم يُجب</span>}
+                  </p>
+                )}
                 <ShortAnswerGrader
                   maxPoints={question.points}
                   currentPoints={answer?.pointsAwarded ?? null}

@@ -13,6 +13,7 @@ enum QuestionType {
   MULTIPLE_CHOICE
   TRUE_FALSE
   SHORT_ANSWER
+  AUDIO_ANSWER
 }
 
 enum AttemptStatus {
@@ -457,6 +458,10 @@ model ExamAttempt {
 model Answer {
   id            String   @id @default(cuid())
   textAnswer    String?
+  // A data: URL (base64), recorded client-side via MediaRecorder for an
+  // AUDIO_ANSWER question — same "no blob storage" convention as question
+  // images, capped much lower given audio is heavier per byte of content.
+  audioUrl      String?
   isCorrect     Boolean?
   pointsAwarded Float?
   // Optional written comment from the teacher, shown to the student in the

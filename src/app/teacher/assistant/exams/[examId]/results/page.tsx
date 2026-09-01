@@ -21,7 +21,7 @@ export default async function AssistantResultsPage({
     include: {
       _count: { select: { cheatLogs: true } },
       answers: {
-        where: { question: { type: "SHORT_ANSWER" } },
+        where: { question: { type: { in: ["SHORT_ANSWER", "AUDIO_ANSWER"] } } },
         select: { pointsAwarded: true },
       },
     },

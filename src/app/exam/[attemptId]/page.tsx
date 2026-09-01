@@ -7,10 +7,11 @@ import { useUI } from "@/components/ui/UIProvider";
 import type { ApiQuestion, ExamStateResponse } from "@/lib/exam-client-types";
 import Icon from "@/components/brand/Icon";
 import ThemeToggle from "@/components/ThemeToggle";
+import AudioAnswerRecorder from "@/components/AudioAnswerRecorder";
 
 type Phase = "intro" | "loading" | "active" | "submitting" | "done" | "error";
 
-type LocalAnswer = { selectedChoiceId?: string; textAnswer?: string };
+type LocalAnswer = { selectedChoiceId?: string; textAnswer?: string; audioUrl?: string };
 
 function formatTime(ms: number) {
   const total = Math.max(0, Math.floor(ms / 1000));
@@ -104,6 +105,7 @@ export default function ExamPage() {
       initialAnswers[q.id] = {
         selectedChoiceId: q.savedSelectedChoiceId ?? undefined,
         textAnswer: q.savedTextAnswer ?? undefined,
+        audioUrl: q.savedAudioUrl ?? undefined,
       };
     }
     setAnswers(initialAnswers);
@@ -245,6 +247,12 @@ export default function ExamPage() {
     scheduleSave(questionId, next);
   }
 
+  function setAudio(questionId: string, audioUrl: string) {
+    const next = { audioUrl };
+    setAnswers((a) => ({ ...a, [questionId]: next }));
+    scheduleSave(questionId, next);
+  }
+
   if (phase === "intro") {
     return (
       <div className="relative flex flex-1 items-center justify-center bg-brand-page-tint px-4 py-16 dark:bg-slate-900">
@@ -286,10 +294,9 @@ export default function ExamPage() {
   }
 
   const current = questions[index];
-  const answeredCount = questions.filter((q) => {
-    const a = answers[q.id];
-    return a?.selectedChoiceId || (a?.textAnswer && a.textAnswer.trim().length > 0);
-  }).length;
+  const isAnswered = (a: LocalAnswer | undefined) =>
+    Boolean(a?.selectedChoiceId || a?.textAnswer?.trim() || a?.audioUrl);
+  const answeredCount = questions.filter((q) => isAnswered(answers[q.id])).length;
 
   return (
     <div className="exam-lockdown flex flex-1 flex-col bg-brand-page-tint dark:bg-slate-900">
@@ -334,9 +341,7 @@ export default function ExamPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-4 py-6">
         <div className="flex flex-wrap justify-center gap-2">
           {questions.map((q, i) => {
-            const answered = Boolean(
-              answers[q.id]?.selectedChoiceId || answers[q.id]?.textAnswer?.trim()
-            );
+            const answered = isAnswered(answers[q.id]);
             return (
               <button
                 key={q.id}
@@ -379,7 +384,7 @@ export default function ExamPage() {
             )}
             <SaveStatusBadge status={saveStatus[current.id]} />
 
-            {current.type !== "SHORT_ANSWER" ? (
+            {current.type === "MULTIPLE_CHOICE" || current.type === "TRUE_FALSE" ? (
               <div className="mt-5 flex flex-col gap-2">
                 {current.choices.map((c) => (
                   <label
@@ -401,6 +406,11 @@ export default function ExamPage() {
                   </label>
                 ))}
               </div>
+            ) : current.type === "AUDIO_ANSWER" ? (
+              <AudioAnswerRecorder
+                value={answers[current.id]?.audioUrl}
+                onChange={(dataUrl) => setAudio(current.id, dataUrl)}
+              />
             ) : (
               <textarea
                 value={answers[current.id]?.textAnswer ?? ""}
