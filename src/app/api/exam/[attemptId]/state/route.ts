@@ -47,6 +47,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
           type: q.type,
           text: q.text,
           points: q.points,
+          imageUrl: q.imageUrl,
           // isCorrect is intentionally withheld from students.
           choices: orderedChoiceIds
             .map((cid) => choiceById.get(cid))

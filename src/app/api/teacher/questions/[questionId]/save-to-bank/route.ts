@@ -27,6 +27,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
         text: question.text,
         points: question.points,
         correctAnswer: question.correctAnswer,
+        imageUrl: question.imageUrl,
         choices: {
           create: question.choices.map((c) => ({
             text: c.text,

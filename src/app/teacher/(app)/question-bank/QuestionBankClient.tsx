@@ -118,6 +118,7 @@ export default function QuestionBankClient({
                   text: q.text,
                   points: q.points,
                   correctAnswer: q.correctAnswer ?? "",
+                  imageUrl: q.imageUrl ?? "",
                   choices: q.choices.map((c) => ({ text: c.text, isCorrect: c.isCorrect })),
                 }}
                 onSubmit={(value) => handleEdit(q.id, value)}
@@ -131,6 +132,14 @@ export default function QuestionBankClient({
                     {typeLabels[q.type]} · {q.points} درجة
                   </span>
                 </div>
+                {q.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset
+                  <img
+                    src={q.imageUrl}
+                    alt="صورة السؤال"
+                    className="mt-2 max-h-32 rounded-lg border border-slate-200 object-contain"
+                  />
+                )}
                 {q.type !== "SHORT_ANSWER" && (
                   <ul className="mt-2 flex flex-col gap-1 text-sm text-slate-600">
                     {q.choices.map((c) => (

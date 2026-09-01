@@ -22,7 +22,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { type, text, points, correctAnswer, choices } = parsed.data;
+    const { type, text, points, correctAnswer, imageUrl, choices } = parsed.data;
 
     if (type === "MULTIPLE_CHOICE") {
       if (!choices || choices.length < 2) {
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         order: nextOrder,
         correctAnswer:
           type === "SHORT_ANSWER" && correctAnswer ? correctAnswer : null,
+        imageUrl: imageUrl || null,
         choices:
           type === "MULTIPLE_CHOICE" && choices
             ? {

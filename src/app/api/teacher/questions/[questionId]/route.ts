@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { text, points, correctAnswer, choices } = parsed.data;
+    const { text, points, correctAnswer, imageUrl, choices } = parsed.data;
 
     const question = await prisma.$transaction(async (tx) => {
       if (choices && existing.type === "MULTIPLE_CHOICE") {
@@ -45,6 +45,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
           ...(existing.type === "SHORT_ANSWER" && correctAnswer !== undefined
             ? { correctAnswer }
             : {}),
+          ...(imageUrl !== undefined ? { imageUrl: imageUrl || null } : {}),
         },
         include: { choices: { orderBy: { order: "asc" } } },
       });

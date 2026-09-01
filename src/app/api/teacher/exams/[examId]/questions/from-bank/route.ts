@@ -49,6 +49,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             points: bq.points,
             order: nextOrder++,
             correctAnswer: bq.correctAnswer,
+            imageUrl: bq.imageUrl,
             choices: {
               create: bq.choices.map((c) => ({
                 text: c.text,

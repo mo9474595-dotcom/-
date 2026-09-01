@@ -9,6 +9,7 @@ export type QuestionFormValue = {
   text: string;
   points: number;
   correctAnswer: string;
+  imageUrl: string;
   choices: { text: string; isCorrect: boolean }[];
 };
 
@@ -17,11 +18,58 @@ const emptyValue: QuestionFormValue = {
   text: "",
   points: 1,
   correctAnswer: "",
+  imageUrl: "",
   choices: [
     { text: "", isCorrect: true },
     { text: "", isCorrect: false },
   ],
 };
+
+const MAX_IMAGE_DIMENSION = 1400;
+// Kept comfortably under the server's 1.5M-char cap (data: URLs run ~33%
+// larger than the raw bytes they encode).
+const MAX_IMAGE_DATA_URL_LENGTH = 900_000;
+
+// Downscales and re-encodes as JPEG in the browser before upload — a raw
+// phone photo can be several megabytes, and this stack stores the image
+// inline as a data: URL (no blob storage), so keeping it small matters both
+// for the request size and for how much it bloats the database row.
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("تعذرت قراءة الصورة"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("الملف ليس صورة صالحة"));
+      img.onload = () => {
+        const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("تعذرت معالجة الصورة"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        let quality = 0.85;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+        while (dataUrl.length > MAX_IMAGE_DATA_URL_LENGTH && quality > 0.2) {
+          quality -= 0.15;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+        if (dataUrl.length > MAX_IMAGE_DATA_URL_LENGTH) {
+          reject(new Error("الصورة كبيرة جداً حتى بعد الضغط، جرّب صورة أخرى"));
+          return;
+        }
+        resolve(dataUrl);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function QuestionForm({
   initial,
@@ -37,6 +85,25 @@ export default function QuestionForm({
   const [value, setValue] = useState<QuestionFormValue>(initial ?? emptyValue);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  async function handleImageSelect(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("الملف المختار ليس صورة");
+      return;
+    }
+    setError(null);
+    setImageBusy(true);
+    try {
+      const dataUrl = await compressImage(file);
+      setValue((v) => ({ ...v, imageUrl: dataUrl }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "تعذر تحميل الصورة");
+    } finally {
+      setImageBusy(false);
+    }
+  }
 
   function updateChoice(index: number, patch: Partial<{ text: string; isCorrect: boolean }>) {
     setValue((v) => ({
@@ -114,6 +181,36 @@ export default function QuestionForm({
           required
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
         />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-medium text-slate-600">صورة السؤال (اختياري)</label>
+        {value.imageUrl ? (
+          <div className="flex items-start gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset */}
+            <img
+              src={value.imageUrl}
+              alt="صورة السؤال"
+              className="max-h-40 rounded-lg border border-slate-200 object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setValue((v) => ({ ...v, imageUrl: "" }))}
+              className="text-sm font-medium text-red-600 hover:underline"
+            >
+              إزالة الصورة
+            </button>
+          </div>
+        ) : (
+          <input
+            type="file"
+            accept="image/*"
+            disabled={imageBusy}
+            onChange={(e) => handleImageSelect(e.target.files?.[0])}
+            className="text-sm text-slate-600 file:ml-3 file:rounded-lg file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-300"
+          />
+        )}
+        {imageBusy && <p className="text-xs text-slate-500">جارٍ ضغط الصورة...</p>}
       </div>
 
       {value.type === "MULTIPLE_CHOICE" && (

@@ -3,6 +3,7 @@ export type ApiQuestion = {
   type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER";
   text: string;
   points: number;
+  imageUrl: string | null;
   choices: { id: string; text: string }[];
   savedSelectedChoiceId: string | null;
   savedTextAnswer: string | null;

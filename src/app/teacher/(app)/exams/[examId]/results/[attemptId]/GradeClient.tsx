@@ -43,6 +43,15 @@ export default function GradeClient({
               <span className="shrink-0 text-xs text-slate-500">{question.points} درجة</span>
             </div>
 
+            {question.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset
+              <img
+                src={question.imageUrl}
+                alt="صورة السؤال"
+                className="mt-2 max-h-48 rounded-lg border border-slate-200 object-contain"
+              />
+            )}
+
             {question.type !== "SHORT_ANSWER" ? (
               <div className="mt-2 flex flex-col gap-1 text-sm">
                 {question.choices.map((c) => {

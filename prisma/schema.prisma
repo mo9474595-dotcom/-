@@ -272,6 +272,10 @@ model Question {
   points        Int          @default(1)
   order         Int          @default(0)
   correctAnswer String? // used for SHORT_ANSWER exact-match / TRUE_FALSE ("true"/"false")
+  // A data: URL (base64), compressed client-side before upload — there's no
+  // blob storage in this stack, so the image is stored inline. Prisma maps
+  // String to Postgres "text" by default, which has no practical size cap.
+  imageUrl      String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -304,6 +308,7 @@ model BankQuestion {
   text          String
   points        Int          @default(1)
   correctAnswer String?
+  imageUrl      String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 

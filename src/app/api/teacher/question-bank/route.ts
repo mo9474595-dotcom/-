@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { type, text, points, correctAnswer, choices } = parsed.data;
+    const { type, text, points, correctAnswer, imageUrl, choices } = parsed.data;
 
     if (type === "MULTIPLE_CHOICE") {
       if (!choices || choices.length < 2) {
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
         text,
         points,
         correctAnswer: type === "SHORT_ANSWER" && correctAnswer ? correctAnswer : null,
+        imageUrl: imageUrl || null,
         choices:
           type === "MULTIPLE_CHOICE" && choices
             ? { create: choices.map((c, i) => ({ text: c.text, isCorrect: c.isCorrect, order: i })) }

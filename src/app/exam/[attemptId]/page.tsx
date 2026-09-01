@@ -366,6 +366,14 @@ export default function ExamPage() {
               </span>
             </div>
             <p className="mt-4 text-lg font-medium text-slate-900">{current.text}</p>
+            {current.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset
+              <img
+                src={current.imageUrl}
+                alt="صورة السؤال"
+                className="mt-3 max-h-96 w-full rounded-xl border border-slate-200 object-contain"
+              />
+            )}
             <SaveStatusBadge status={saveStatus[current.id]} />
 
             {current.type !== "SHORT_ANSWER" ? (

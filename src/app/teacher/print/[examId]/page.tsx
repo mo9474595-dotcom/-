@@ -67,6 +67,15 @@ export default async function ExamPrintPage({
               <span className="mr-2 text-xs font-normal text-slate-500">({q.points} درجة)</span>
             </p>
 
+            {q.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- data: URL, not an optimizable remote asset
+              <img
+                src={q.imageUrl}
+                alt=""
+                className="mt-2 max-h-64 max-w-full object-contain"
+              />
+            )}
+
             {q.type !== "SHORT_ANSWER" ? (
               <div className="mt-2 flex flex-col gap-1.5 pr-4">
                 {q.choices.map((c, ci) => {

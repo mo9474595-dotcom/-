@@ -41,11 +41,23 @@ export const choiceSchema = z.object({
   isCorrect: z.coerce.boolean().default(false),
 });
 
+// A data: URL, so this is base64 rather than pixel count — capped well
+// above what the client-side compression in QuestionForm ever produces
+// (~700KB raw), as a safety net against a request built outside that form.
+const questionImageUrl = z
+  .string()
+  .trim()
+  .max(1_500_000, "حجم الصورة كبير جداً")
+  .refine((v) => v === "" || v.startsWith("data:image/"), "صيغة الصورة غير صالحة")
+  .optional()
+  .or(z.literal(""));
+
 export const questionSchema = z.object({
   type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]),
   text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000),
   points: z.coerce.number().int().min(1).max(100).default(1),
   correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
+  imageUrl: questionImageUrl,
   choices: z.array(choiceSchema).optional(),
 });
 
@@ -58,6 +70,7 @@ export const questionUpdateSchema = z.object({
   text: z.string().trim().min(1, "نص السؤال مطلوب").max(4000).optional(),
   points: z.coerce.number().int().min(1).max(100).optional(),
   correctAnswer: z.string().trim().max(1000).optional().or(z.literal("")),
+  imageUrl: questionImageUrl,
   choices: z.array(choiceSchema).optional(),
 });
 
