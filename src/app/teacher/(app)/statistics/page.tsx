@@ -1,5 +1,6 @@
 import { requireTeacherId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { computeClassRanking } from "@/lib/ranking";
 import Link from "next/link";
 import Icon from "@/components/brand/Icon";
 
@@ -38,6 +39,28 @@ export default async function StatisticsPage() {
     ? allPercents.reduce((s, p) => s + p, 0) / totalAttempts
     : null;
   const examsWithData = examStats.filter((es) => es.count > 0).length;
+
+  const classes = await prisma.classSection.findMany({
+    where: { teacherId, deletedAt: null },
+    orderBy: { name: "asc" },
+  });
+  const classStats = await Promise.all(
+    classes.map(async (cls) => {
+      const ranking = await computeClassRanking(cls.id);
+      const withOverall = ranking.filter((r): r is typeof r & { overallPct: number } => r.overallPct != null);
+      const average = withOverall.length
+        ? withOverall.reduce((s, r) => s + r.overallPct, 0) / withOverall.length
+        : null;
+      return { classSection: cls, studentCount: ranking.length, gradedCount: withOverall.length, average };
+    })
+  );
+  const comparableClasses = classStats.filter((c) => c.average != null);
+  const highestClassAvg = comparableClasses.length
+    ? Math.max(...comparableClasses.map((c) => c.average!))
+    : null;
+  const lowestClassAvg = comparableClasses.length
+    ? Math.min(...comparableClasses.map((c) => c.average!))
+    : null;
 
   return (
     <div>
@@ -106,6 +129,62 @@ export default async function StatisticsPage() {
           </div>
         )}
       </div>
+
+      {classes.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-slate-900">مقارنة الأداء بين الشعب</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            المعدل العام الموزون لكل شعبة (امتحانات، درجات أخرى، مشاريع، حضور) بحسب أوزان تلك
+            الشعبة.
+          </p>
+
+          <div className="mt-4 flex flex-col gap-3">
+            {classStats
+              .slice()
+              .sort((a, b) => (b.average ?? -1) - (a.average ?? -1))
+              .map(({ classSection, studentCount, gradedCount, average }) => (
+                <Link
+                  key={classSection.id}
+                  href={`/teacher/classes/${classSection.id}`}
+                  className="block rounded-xl bg-brand-panel/40 p-4 transition hover:bg-brand-panel/70"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="flex items-center gap-2 font-medium text-slate-900">
+                      {classSection.name}
+                      {average != null && average === highestClassAvg && comparableClasses.length > 1 && (
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                          الأعلى أداءً
+                        </span>
+                      )}
+                      {average != null && average === lowestClassAvg && comparableClasses.length > 1 && (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                          الأدنى أداءً
+                        </span>
+                      )}
+                    </p>
+                    <span className="text-xs text-slate-500">
+                      {gradedCount} من {studentCount} طالب لديهم درجات
+                    </span>
+                  </div>
+
+                  {average != null ? (
+                    <>
+                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className="h-full rounded-full bg-brand-blue"
+                          style={{ width: `${Math.min(100, Math.max(0, average))}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-xs text-slate-600">المعدل العام: {round1(average)}%</p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-xs text-slate-400">لا توجد درجات كافية بعد للمقارنة</p>
+                  )}
+                </Link>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
