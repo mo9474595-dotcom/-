@@ -28,6 +28,7 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
   const [savingToBankId, setSavingToBankId] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [cloning, setCloning] = useState(false);
   // Tracked separately from exam.questions (a server-refreshed prop) so the
   // publish guard can't read a stale count: router.refresh() after adding a
   // question is async, and a teacher who publishes right after adding
@@ -136,6 +137,20 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
     }
   }
 
+  async function handleCloneExam() {
+    setCloning(true);
+    const res = await fetch(`/api/teacher/exams/${exam.id}/clone`, { method: "POST" });
+    const data = await res.json().catch(() => null);
+    setCloning(false);
+    if (!res.ok) {
+      toast(data?.error ?? "تعذر استنساخ الامتحان", "error");
+      return;
+    }
+    toast("تم استنساخ الامتحان كمسودة جديدة", "success");
+    router.push(`/teacher/exams/${data.exam.id}`);
+    router.refresh();
+  }
+
   async function handleAddFromBank(bankQuestionIds: string[]) {
     const res = await fetch(`/api/teacher/exams/${exam.id}/questions/from-bank`, {
       method: "POST",
@@ -178,12 +193,21 @@ export default function ExamDetailClient({ exam }: { exam: ExamWithQuestions }) 
               {isPublished ? "إلغاء النشر" : "نشر الامتحان"}
             </button>
             {publishError && <p className="text-xs text-red-600">{publishError}</p>}
-            <button
-              onClick={handleDeleteExam}
-              className="text-xs font-medium text-red-600 hover:underline"
-            >
-              حذف الامتحان
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleCloneExam}
+                disabled={cloning}
+                className="text-xs font-medium text-brand-blue hover:underline disabled:opacity-60"
+              >
+                {cloning ? "جارٍ الاستنساخ..." : "استنساخ كامتحان جديد"}
+              </button>
+              <button
+                onClick={handleDeleteExam}
+                className="text-xs font-medium text-red-600 hover:underline"
+              >
+                حذف الامتحان
+              </button>
+            </div>
           </div>
         </div>
       </div>
