@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Question, Choice, Answer, FeedbackSnippet } from "@prisma/client";
+import { textSimilarity } from "@/lib/text-similarity";
 
 type Item = {
   question: Question & { choices: Choice[] };
@@ -108,6 +109,8 @@ export default function GradeClient({
                   maxPoints={question.points}
                   currentPoints={answer?.pointsAwarded ?? null}
                   currentFeedback={answer?.feedback ?? ""}
+                  studentAnswer={answer?.textAnswer ?? null}
+                  modelAnswer={question.correctAnswer}
                   snippets={snippets}
                   disabled={!answer || saving === answer?.id}
                   onSave={(points, feedback) => answer && saveGrade(answer.id, points, feedback)}
@@ -127,6 +130,8 @@ function ShortAnswerGrader({
   maxPoints,
   currentPoints,
   currentFeedback,
+  studentAnswer,
+  modelAnswer,
   snippets,
   disabled,
   onSave,
@@ -136,6 +141,8 @@ function ShortAnswerGrader({
   maxPoints: number;
   currentPoints: number | null;
   currentFeedback: string;
+  studentAnswer: string | null;
+  modelAnswer: string | null;
   snippets: FeedbackSnippet[];
   disabled: boolean;
   onSave: (points: number, feedback: string) => void;
@@ -146,8 +153,34 @@ function ShortAnswerGrader({
   const [feedback, setFeedback] = useState(currentFeedback);
   const [showSnippets, setShowSnippets] = useState(false);
 
+  // A word-overlap suggestion against the teacher's model answer — a
+  // starting point the teacher can accept or ignore, never applied
+  // automatically, since exact wording match is a poor proxy for whether a
+  // short answer is actually correct.
+  const suggestion = useMemo(() => {
+    if (!modelAnswer?.trim() || !studentAnswer?.trim() || currentPoints != null) return null;
+    const similarity = textSimilarity(studentAnswer, modelAnswer);
+    return { similarity, points: Math.round(similarity * maxPoints) };
+  }, [modelAnswer, studentAnswer, maxPoints, currentPoints]);
+
   return (
     <div className="flex flex-col gap-2">
+      {suggestion && (
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs">
+          <span className="text-blue-700">
+            اقتراح تلقائي بناءً على تشابه الكلمات مع الإجابة النموذجية (
+            {Math.round(suggestion.similarity * 100)}%): {suggestion.points} / {maxPoints}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPoints(suggestion.points)}
+            className="shrink-0 rounded-full bg-blue-600 px-2.5 py-1 font-medium text-white hover:bg-blue-700"
+          >
+            استخدام الاقتراح
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         <input
           type="number"
