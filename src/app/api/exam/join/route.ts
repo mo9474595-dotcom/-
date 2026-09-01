@@ -105,7 +105,9 @@ export async function POST(req: NextRequest) {
 
     const sessionToken = generateSessionToken();
     const now = new Date();
-    const deadlineAt = new Date(now.getTime() + exam.durationMinutes * 60_000);
+    const deadlineAt = new Date(
+      now.getTime() + (exam.durationMinutes + examCode.extraMinutes) * 60_000
+    );
     const ipAddress =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 

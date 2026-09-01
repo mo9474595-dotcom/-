@@ -36,6 +36,20 @@ export default function CodesClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [savingExtraId, setSavingExtraId] = useState<string | null>(null);
+
+  async function saveExtraMinutes(codeId: string, extraMinutes: number) {
+    setSavingExtraId(codeId);
+    const res = await fetch(`/api/teacher/exams/${examId}/codes/${codeId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ extraMinutes }),
+    });
+    setSavingExtraId(null);
+    if (res.ok) {
+      setCodes((prev) => prev.map((c) => (c.id === codeId ? { ...c, extraMinutes } : c)));
+    }
+  }
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
@@ -170,6 +184,7 @@ export default function CodesClient({
               <th className="px-4 py-3 font-medium">الطالب</th>
               <th className="px-4 py-3 font-medium">الحالة</th>
               <th className="px-4 py-3 font-medium">الدرجة</th>
+              <th className="px-4 py-3 font-medium">وقت إضافي (د)</th>
               <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
@@ -195,6 +210,20 @@ export default function CodesClient({
                     <ScoreFraction score={c.attempt?.score} max={c.attempt?.maxScore} />
                   </td>
                   <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      min={0}
+                      max={600}
+                      defaultValue={c.extraMinutes}
+                      disabled={savingExtraId === c.id}
+                      onBlur={(e) => {
+                        const minutes = Math.max(0, Math.min(600, Number(e.target.value) || 0));
+                        if (minutes !== c.extraMinutes) saveExtraMinutes(c.id, minutes);
+                      }}
+                      className="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm disabled:opacity-60"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
                     <button
                       onClick={() => copyCode(c.code)}
                       className="flex items-center gap-1 text-xs font-medium text-brand-blue hover:underline"
@@ -208,7 +237,7 @@ export default function CodesClient({
             })}
             {pageItems.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                   {codes.length === 0 ? "لا توجد رموز بعد." : "لا توجد نتائج مطابقة."}
                 </td>
               </tr>

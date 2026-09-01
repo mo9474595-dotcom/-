@@ -90,6 +90,17 @@ export async function getOwnedQuestion(teacherId: string, questionId: string) {
   return question;
 }
 
+export async function getOwnedExamCode(teacherId: string, codeId: string) {
+  const examCode = await prisma.examCode.findUnique({
+    where: { id: codeId },
+    include: { exam: true },
+  });
+  if (!examCode || examCode.exam.teacherId !== teacherId) {
+    throw new NotFoundError("الرمز غير موجود");
+  }
+  return examCode;
+}
+
 export async function getOwnedBankQuestion(teacherId: string, bankQuestionId: string) {
   const bankQuestion = await prisma.bankQuestion.findUnique({
     where: { id: bankQuestionId },

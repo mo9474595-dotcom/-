@@ -338,12 +338,15 @@ model BankChoice {
 // A code the teacher generates and shares with a specific student (or a batch).
 // Joining an exam always requires a valid, unused-or-in-progress code.
 model ExamCode {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  studentName String?
-  studentRef  String? // e.g. student ID / seat number, set by teacher
-  createdAt   DateTime  @default(now())
-  usedAt      DateTime?
+  id           String    @id @default(cuid())
+  code         String    @unique
+  studentName  String?
+  studentRef   String? // e.g. student ID / seat number, set by teacher
+  // Accommodation: added on top of the exam's normal duration when this
+  // student's attempt deadline is computed at join time.
+  extraMinutes Int       @default(0)
+  createdAt    DateTime  @default(now())
+  usedAt       DateTime?
 
   examId String
   exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
