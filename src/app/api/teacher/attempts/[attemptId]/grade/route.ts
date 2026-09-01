@@ -12,6 +12,7 @@ type RouteParams = { params: Promise<{ attemptId: string }> };
 const gradeSchema = z.object({
   answerId: z.string().min(1),
   pointsAwarded: z.coerce.number().min(0),
+  feedback: z.string().trim().max(1000).optional().or(z.literal("")),
 });
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
@@ -41,7 +42,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     await prisma.answer.update({
       where: { id: answer.id },
-      data: { pointsAwarded: capped, isCorrect: capped >= answer.question.points },
+      data: {
+        pointsAwarded: capped,
+        isCorrect: capped >= answer.question.points,
+        ...(parsed.data.feedback !== undefined ? { feedback: parsed.data.feedback || null } : {}),
+      },
     });
 
     const score = await recomputeAttemptScore(attemptId);

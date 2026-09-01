@@ -53,11 +53,26 @@ model Teacher {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  exams         Exam[]
-  classSections ClassSection[]
-  auditLogs     AuditLog[]
-  bankQuestions BankQuestion[]
-  notifications Notification[]
+  exams            Exam[]
+  classSections    ClassSection[]
+  auditLogs        AuditLog[]
+  bankQuestions    BankQuestion[]
+  notifications    Notification[]
+  feedbackSnippets FeedbackSnippet[]
+}
+
+// A teacher's personal library of reusable feedback phrases, inserted with
+// one click while grading short-answer questions instead of retyping the
+// same comment over and over.
+model FeedbackSnippet {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
 }
 
 // An in-app notification about something a teacher would want to know
@@ -394,6 +409,9 @@ model Answer {
   textAnswer    String?
   isCorrect     Boolean?
   pointsAwarded Float?
+  // Optional written comment from the teacher, shown to the student in the
+  // detailed result review alongside the model answer.
+  feedback      String?
   updatedAt     DateTime @updatedAt
 
   attemptId String

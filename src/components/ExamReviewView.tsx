@@ -97,6 +97,12 @@ export default function ExamReviewView({ data }: { data: AttemptReview }) {
                       <p className="mt-0.5 text-green-800 dark:text-green-200">{q.correctAnswer}</p>
                     </div>
                   )}
+                  {q.feedback && (
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/40">
+                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300">ملاحظة الأستاذ</p>
+                      <p className="mt-0.5 text-blue-800 dark:text-blue-200">{q.feedback}</p>
+                    </div>
+                  )}
                 </div>
               )}
 

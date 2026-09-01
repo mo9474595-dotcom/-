@@ -101,6 +101,14 @@ export async function getOwnedExamCode(teacherId: string, codeId: string) {
   return examCode;
 }
 
+export async function getOwnedFeedbackSnippet(teacherId: string, snippetId: string) {
+  const snippet = await prisma.feedbackSnippet.findUnique({ where: { id: snippetId } });
+  if (!snippet || snippet.teacherId !== teacherId) {
+    throw new NotFoundError("الملاحظة غير موجودة");
+  }
+  return snippet;
+}
+
 export async function getOwnedBankQuestion(teacherId: string, bankQuestionId: string) {
   const bankQuestion = await prisma.bankQuestion.findUnique({
     where: { id: bankQuestionId },

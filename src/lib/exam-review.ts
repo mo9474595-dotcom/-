@@ -12,6 +12,7 @@ export type QuestionReview = {
   selectedChoiceId: string | null;
   textAnswer: string | null;
   correctAnswer: string | null;
+  feedback: string | null;
 };
 
 export type AttemptReview = {
@@ -73,6 +74,7 @@ export async function getAttemptReview(attemptId: string): Promise<AttemptReview
         selectedChoiceId: answer?.selectedChoiceId ?? null,
         textAnswer: answer?.textAnswer ?? null,
         correctAnswer: q.type === "SHORT_ANSWER" ? q.correctAnswer : null,
+        feedback: answer?.feedback ?? null,
       };
     });
 
