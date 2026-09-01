@@ -10,7 +10,8 @@ export type CheatEventType =
   | "PASTE_ATTEMPT"
   | "CONTEXT_MENU"
   | "DEVTOOLS_SUSPECTED"
-  | "SHORTCUT_BLOCKED";
+  | "SHORTCUT_BLOCKED"
+  | "SCREEN_RECORDING_SUSPECTED";
 
 const LABELS: Record<CheatEventType, string> = {
   TAB_HIDDEN: "تم رصد مغادرتك للصفحة",
@@ -21,7 +22,19 @@ const LABELS: Record<CheatEventType, string> = {
   CONTEXT_MENU: "القائمة المنسدلة غير مسموحة خلال الامتحان",
   DEVTOOLS_SUSPECTED: "تم رصد اشتباه بفتح أدوات المطور",
   SHORTCUT_BLOCKED: "هذا الاختصار غير مسموح خلال الامتحان",
+  SCREEN_RECORDING_SUSPECTED: "تم رصد اشتباه بتسجيل الشاشة",
 };
+
+// DOM/global-scope markers that popular browser-based screen recorders
+// leave behind while active. Best-effort only: a native OS recorder (Game
+// Bar, QuickTime, OBS) or an extension running in an isolated content-script
+// world is invisible to page JS — there's no browser API that exposes
+// "something outside this tab is capturing it." This only catches
+// recorders that inject into the page itself.
+const RECORDER_DOM_SELECTOR =
+  '[id*="loom" i], [class*="loom" i], [id*="screencastify" i], [class*="screencastify" i], ' +
+  '[id*="nimbus-capture" i], [class*="nimbus-capture" i], [id*="vidyard" i], [class*="vidyard" i], ' +
+  '[id*="awesome-screenshot" i], [class*="awesome-screenshot" i], [id*="loom-companion" i]';
 
 /**
  * Client-side deterrent layer. None of this is airtight (a phone camera or
@@ -139,6 +152,37 @@ export function useExamLockdown(
       }
     }, 4000);
 
+    // Catches a screen-recording extension that injects itself into the
+    // page (Loom, Screencastify, Nimbus Capture, etc.) by scanning for the
+    // DOM footprint it leaves while recording.
+    const recorderScanInterval = setInterval(() => {
+      if (document.querySelector(RECORDER_DOM_SELECTOR)) {
+        report("SCREEN_RECORDING_SUSPECTED", "recorder-dom-marker");
+      }
+    }, 5000);
+
+    // Catches an in-page script invoking the Screen Capture API against
+    // this tab. Wrapped in a try/catch since some browsers expose
+    // mediaDevices only on secure origins.
+    let restoreGetDisplayMedia: (() => void) | null = null;
+    try {
+      const mediaDevices = navigator.mediaDevices as
+        | (MediaDevices & { getDisplayMedia?: (...args: unknown[]) => Promise<MediaStream> })
+        | undefined;
+      const original = mediaDevices?.getDisplayMedia;
+      if (mediaDevices && original) {
+        mediaDevices.getDisplayMedia = function patchedGetDisplayMedia(...args: unknown[]) {
+          report("SCREEN_RECORDING_SUSPECTED", "getDisplayMedia-called");
+          return original.apply(mediaDevices, args);
+        };
+        restoreGetDisplayMedia = () => {
+          mediaDevices.getDisplayMedia = original;
+        };
+      }
+    } catch {
+      // Screen Capture API unavailable in this browser/context — nothing to patch.
+    }
+
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("blur", onBlur);
@@ -150,6 +194,8 @@ export function useExamLockdown(
       document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("beforeunload", onBeforeUnload);
       clearInterval(devtoolsInterval);
+      clearInterval(recorderScanInterval);
+      restoreGetDisplayMedia?.();
       if (warningTimeout.current) clearTimeout(warningTimeout.current);
     };
   }, [active, report]);

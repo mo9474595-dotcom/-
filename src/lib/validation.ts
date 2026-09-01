@@ -203,6 +203,7 @@ export const cheatEventSchema = z.object({
     "DEVTOOLS_SUSPECTED",
     "MULTIPLE_SESSION_BLOCKED",
     "SHORTCUT_BLOCKED",
+    "SCREEN_RECORDING_SUSPECTED",
   ]),
   detail: z.string().max(300).optional(),
 });

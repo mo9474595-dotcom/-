@@ -15,6 +15,7 @@ const cheatLabels: Record<string, string> = {
   DEVTOOLS_SUSPECTED: "اشتباه بفتح أدوات المطور",
   MULTIPLE_SESSION_BLOCKED: "محاولة دخول من جهاز آخر بنفس الرمز",
   SHORTCUT_BLOCKED: "استخدام اختصار لوحة مفاتيح محظور",
+  SCREEN_RECORDING_SUSPECTED: "اشتباه بتسجيل الشاشة",
 };
 
 export default async function AttemptDetailPage({
