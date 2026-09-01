@@ -246,6 +246,11 @@ model Exam {
   shuffleChoices   Boolean   @default(true)
   maxTabViolations Int       @default(3)
   isPublished      Boolean   @default(false)
+  // Separate from isPublished (which controls whether students can take the
+  // exam at all): this gates the detailed per-question review students see
+  // after they've finished, so a teacher can grade manual (SHORT_ANSWER)
+  // answers before revealing correct answers to the whole class.
+  resultsPublished Boolean   @default(false)
   // Optional availability window on top of isPublished. Null means "no
   // restriction on that side" — e.g. opensAt set with closesAt null stays
   // open indefinitely once it opens.

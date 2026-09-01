@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { computeClassRanking } from "@/lib/ranking";
 import QuickJoinButton from "@/components/QuickJoinButton";
@@ -131,6 +132,16 @@ export default async function StudentPortalPage({
                   <td className="px-2 py-2">{c.exam.title}</td>
                   <td className="px-2 py-2 text-left text-slate-600">
                     <ScoreFraction score={c.attempt!.score} max={c.attempt!.maxScore} />
+                  </td>
+                  <td className="px-2 py-2 text-left">
+                    {c.exam.resultsPublished && (
+                      <Link
+                        href={`/student/${token}/review/${c.attempt!.id}`}
+                        className="text-xs font-medium text-brand-blue hover:underline"
+                      >
+                        عرض التفاصيل
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}

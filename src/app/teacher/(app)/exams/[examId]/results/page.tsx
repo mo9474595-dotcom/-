@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTeacherId } from "@/lib/auth";
 import ResultsTableClient from "./ResultsTableClient";
+import PublishResultsToggle from "./PublishResultsToggle";
 
 export default async function ResultsPage({
   params,
@@ -28,8 +29,17 @@ export default async function ResultsPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-navy-dark">النتائج — {exam.title}</h1>
-      <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-brand-navy-dark">النتائج — {exam.title}</h1>
+          <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
+        </div>
+        <PublishResultsToggle examId={examId} initialPublished={exam.resultsPublished} />
+      </div>
+      <p className="mt-2 max-w-xl text-sm text-slate-500">
+        عند نشر تفاصيل النتيجة، يمكن للطلاب الاطلاع على إجاباتهم مقابل الإجابات الصحيحة لكل
+        سؤال. يُفضَّل نشرها بعد الانتهاء من تصحيح الأسئلة ذات الإجابة القصيرة يدوياً.
+      </p>
       <ResultsTableClient examId={examId} attempts={attempts} />
     </div>
   );

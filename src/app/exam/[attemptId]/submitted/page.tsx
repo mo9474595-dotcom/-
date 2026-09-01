@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import Icon from "@/components/brand/Icon";
 
 const messages: Record<
@@ -61,6 +62,14 @@ export default function SubmittedPage() {
         )}
         <h1 className={`text-xl font-bold ${info.tone}`}>{info.title}</h1>
         <p className="mt-3 text-sm text-slate-600">{info.body}</p>
+        {status !== "TERMINATED" && (
+          <Link
+            href={`/exam/${attemptId}/review`}
+            className="mt-5 inline-block rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            عرض تفصيل النتيجة
+          </Link>
+        )}
       </div>
     </div>
   );

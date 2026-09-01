@@ -145,9 +145,11 @@ export async function POST(req: NextRequest) {
       throw err;
     }
 
-    // Cookie outlives the exam a bit so the "submitted" confirmation page
-    // still works after the deadline passes.
-    const cookieExpiry = new Date(deadlineAt.getTime() + 60 * 60_000);
+    // Cookie outlives the exam so the "submitted" confirmation page and the
+    // detailed results review (only unlocked once the teacher publishes
+    // grades, which can happen well after the exam itself) still work on
+    // the same device days later.
+    const cookieExpiry = new Date(deadlineAt.getTime() + 30 * 24 * 60 * 60_000);
     await setExamSessionCookie(attempt.id, sessionToken, cookieExpiry);
 
     return NextResponse.json({ attemptId: attempt.id });

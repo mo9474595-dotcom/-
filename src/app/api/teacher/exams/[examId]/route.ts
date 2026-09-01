@@ -41,6 +41,7 @@ const nullableDateTime = z
 
 const updateSchema = examUpdateSchema.extend({
   isPublished: z.coerce.boolean().optional(),
+  resultsPublished: z.coerce.boolean().optional(),
   opensAt: nullableDateTime.optional(),
   closesAt: nullableDateTime.optional(),
 });
