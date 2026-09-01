@@ -62,14 +62,22 @@ export default function SubmittedPage() {
         )}
         <h1 className={`text-xl font-bold ${info.tone}`}>{info.title}</h1>
         <p className="mt-3 text-sm text-slate-600">{info.body}</p>
-        {status !== "TERMINATED" && (
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           <Link
-            href={`/exam/${attemptId}/review`}
-            className="mt-5 inline-block rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            href={`/exam/${attemptId}/receipt`}
+            className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-navy"
           >
-            عرض تفصيل النتيجة
+            تحميل إيصال الامتحان
           </Link>
-        )}
+          {status !== "TERMINATED" && (
+            <Link
+              href={`/exam/${attemptId}/review`}
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              عرض تفصيل النتيجة
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
