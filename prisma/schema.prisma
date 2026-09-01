@@ -59,6 +59,22 @@ model Teacher {
   bankQuestions    BankQuestion[]
   notifications    Notification[]
   feedbackSnippets FeedbackSnippet[]
+  backups          Backup[]
+}
+
+// A scheduled automatic snapshot of everything a teacher owns (same shape
+// as the manual export), generated periodically by /api/cron/backups.
+// Only the most recent few are kept per teacher (see the cron route) so
+// this table doesn't grow unbounded.
+model Backup {
+  id        String   @id @default(cuid())
+  data      String // JSON payload, same shape as the manual export endpoint
+  createdAt DateTime @default(now())
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId, createdAt])
 }
 
 // A teacher's personal library of reusable feedback phrases, inserted with

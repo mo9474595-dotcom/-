@@ -109,6 +109,14 @@ export async function getOwnedFeedbackSnippet(teacherId: string, snippetId: stri
   return snippet;
 }
 
+export async function getOwnedBackup(teacherId: string, backupId: string) {
+  const backup = await prisma.backup.findUnique({ where: { id: backupId } });
+  if (!backup || backup.teacherId !== teacherId) {
+    throw new NotFoundError("النسخة الاحتياطية غير موجودة");
+  }
+  return backup;
+}
+
 export async function getOwnedBankQuestion(teacherId: string, bankQuestionId: string) {
   const bankQuestion = await prisma.bankQuestion.findUnique({
     where: { id: bankQuestionId },

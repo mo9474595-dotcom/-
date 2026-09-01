@@ -53,13 +53,17 @@ export default function TeacherNav({ isAdmin = false }: { isAdmin?: boolean }) {
           </Link>
         );
       })}
-      <a
-        href="/api/teacher/export"
-        className="flex items-center gap-1.5 border-b-2 border-transparent pb-2 text-sm font-medium text-slate-500 hover:text-slate-700"
+      <Link
+        href="/teacher/backups"
+        className={`flex items-center gap-1.5 border-b-2 pb-2 text-sm font-medium transition ${
+          pathname.startsWith("/teacher/backups")
+            ? "border-brand-blue text-brand-navy-dark"
+            : "border-transparent text-slate-500 hover:text-slate-700"
+        }`}
       >
         <Icon name="cloud" size={16} />
-        نسخة احتياطية
-      </a>
+        النسخ الاحتياطية
+      </Link>
     </nav>
   );
 }
