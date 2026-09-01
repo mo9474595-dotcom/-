@@ -8,6 +8,7 @@ import { useUI } from "@/components/ui/UIProvider";
 import { usePagedSearch } from "@/components/ui/usePagedSearch";
 import PaginationBar from "@/components/ui/PaginationBar";
 import Icon from "@/components/brand/Icon";
+import QuestionGeneratorPanel from "./QuestionGeneratorPanel";
 
 type BankQuestionWithChoices = BankQuestion & { choices: BankChoice[] };
 
@@ -95,6 +96,10 @@ export default function QuestionBankClient({
           <QuestionForm submitLabel="إضافة" onSubmit={handleAdd} onCancel={() => setShowAddForm(false)} />
         </div>
       )}
+
+      <div className="mt-4">
+        <QuestionGeneratorPanel onAdd={handleAdd} />
+      </div>
 
       {items.length > 0 && (
         <div className="mt-4 max-w-xs">
