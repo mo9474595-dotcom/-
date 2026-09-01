@@ -53,12 +53,11 @@ model Teacher {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  exams               Exam[]
-  classSections       ClassSection[]
-  auditLogs           AuditLog[]
-  bankQuestions       BankQuestion[]
-  passwordResetTokens PasswordResetToken[]
-  notifications       Notification[]
+  exams         Exam[]
+  classSections ClassSection[]
+  auditLogs     AuditLog[]
+  bankQuestions BankQuestion[]
+  notifications Notification[]
 }
 
 // An in-app notification about something a teacher would want to know
@@ -76,23 +75,6 @@ model Notification {
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId, read, createdAt])
-}
-
-// A one-time-use link sent to a teacher's email to let them set a new
-// password. Only a SHA-256 hash of the token is stored, so a database leak
-// alone can't be used to take over an account the way a leaked raw token
-// could — the raw token exists only in the emailed URL.
-model PasswordResetToken {
-  id        String    @id @default(cuid())
-  tokenHash String    @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
-
-  teacherId String
-  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-
-  @@index([teacherId])
 }
 
 // A record of a sensitive manual action a teacher took, for accountability
