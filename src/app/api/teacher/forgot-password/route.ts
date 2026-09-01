@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
 
   const normalizedEmail = parsed.data.email.toLowerCase();
   const teacher = await prisma.teacher.findUnique({ where: { email: normalizedEmail } });
+  // TEMPORARY diagnostic log — remove once the "no email received" issue is
+  // confirmed fixed. Logs to Vercel's function logs only, never to the client.
+  console.log(`[forgot-password][debug] lookup for "${normalizedEmail}": ${teacher ? "FOUND" : "NOT FOUND"}`);
 
   // Always respond the same way whether or not the account exists — unlike
   // registration (which knowingly reveals a taken email for UX reasons),
