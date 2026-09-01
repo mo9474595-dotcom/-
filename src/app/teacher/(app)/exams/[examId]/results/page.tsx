@@ -34,7 +34,11 @@ export default async function ResultsPage({
           <h1 className="text-2xl font-bold text-brand-navy-dark">النتائج — {exam.title}</h1>
           <div className="mt-1 h-1 w-16 rounded-full bg-brand-blue" />
         </div>
-        <PublishResultsToggle examId={examId} initialPublished={exam.resultsPublished} />
+        <PublishResultsToggle
+          examId={examId}
+          initialPublished={exam.resultsPublished}
+          initialPublishAt={exam.resultsPublishAt}
+        />
       </div>
       <p className="mt-2 max-w-xl text-sm text-slate-500">
         عند نشر تفاصيل النتيجة، يمكن للطلاب الاطلاع على إجاباتهم مقابل الإجابات الصحيحة لكل

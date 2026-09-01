@@ -28,6 +28,23 @@ export type AttemptReviewResult =
   | { ok: true; data: AttemptReview }
   | { ok: false; reason: "not_found" | "in_progress" | "not_published" };
 
+// Flips resultsPublished on the first read after a teacher-scheduled
+// publish time has passed, instead of requiring a background cron job —
+// same lazy-check pattern as closeIfExpired for attempt deadlines and the
+// opens/closes window on exam join.
+export async function isResultsPublished(exam: {
+  id: string;
+  resultsPublished: boolean;
+  resultsPublishAt: Date | null;
+}): Promise<boolean> {
+  if (exam.resultsPublished) return true;
+  if (exam.resultsPublishAt && exam.resultsPublishAt <= new Date()) {
+    await prisma.exam.update({ where: { id: exam.id }, data: { resultsPublished: true } });
+    return true;
+  }
+  return false;
+}
+
 // Shared by both student-facing review entry points (the exam-session-cookie
 // one right after submitting, and the student-portal one for a later visit)
 // so the publish gate and question-ordering logic live in exactly one place.
@@ -38,7 +55,7 @@ export async function getAttemptReview(attemptId: string): Promise<AttemptReview
   });
   if (!attempt) return { ok: false, reason: "not_found" };
   if (attempt.status === "IN_PROGRESS") return { ok: false, reason: "in_progress" };
-  if (!attempt.exam.resultsPublished) return { ok: false, reason: "not_published" };
+  if (!(await isResultsPublished(attempt.exam))) return { ok: false, reason: "not_published" };
 
   const questions = await prisma.question.findMany({
     where: { examId: attempt.examId },

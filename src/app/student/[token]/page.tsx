@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { computeClassRanking } from "@/lib/ranking";
+import { isResultsPublished } from "@/lib/exam-review";
 import QuickJoinButton from "@/components/QuickJoinButton";
 import ScoreFraction from "@/components/ScoreFraction";
 import Icon from "@/components/brand/Icon";
@@ -68,8 +69,17 @@ export default async function StudentPortalPage({
   const upcomingExams = eligibleExams.filter(
     (c) => !c.attempt && c.exam.opensAt && c.exam.opensAt > now
   );
-  const finishedExams = student.examCodes.filter(
+  const finishedExamCodes = student.examCodes.filter(
     (c) => c.attempt && c.attempt.status !== "IN_PROGRESS"
+  );
+  // Resolves any teacher-scheduled auto-publish time that has passed by
+  // now, so a scheduled publish takes effect the moment a student opens
+  // their portal rather than needing a background job.
+  const finishedExams = await Promise.all(
+    finishedExamCodes.map(async (c) => ({
+      ...c,
+      resultsPublishedNow: await isResultsPublished(c.exam),
+    }))
   );
 
   return (
@@ -181,7 +191,7 @@ export default async function StudentPortalPage({
                     <ScoreFraction score={c.attempt!.score} max={c.attempt!.maxScore} />
                   </td>
                   <td className="px-2 py-2 text-left">
-                    {c.exam.resultsPublished && (
+                    {c.resultsPublishedNow && (
                       <Link
                         href={`/student/${token}/review/${c.attempt!.id}`}
                         className="text-xs font-medium text-brand-blue hover:underline dark:text-blue-400"

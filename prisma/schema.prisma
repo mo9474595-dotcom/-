@@ -266,6 +266,10 @@ model Exam {
   // after they've finished, so a teacher can grade manual (SHORT_ANSWER)
   // answers before revealing correct answers to the whole class.
   resultsPublished Boolean   @default(false)
+  // Optional future time at which resultsPublished flips on by itself (see
+  // isResultsPublished in exam-review.ts) — checked lazily on the next
+  // read rather than needing a background job.
+  resultsPublishAt DateTime?
   // Optional availability window on top of isPublished. Null means "no
   // restriction on that side" — e.g. opensAt set with closesAt null stays
   // open indefinitely once it opens.
