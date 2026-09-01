@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { computeClassRanking } from "@/lib/ranking";
 import { isResultsPublished } from "@/lib/exam-review";
+import { computeStudentBadges } from "@/lib/badges";
 import QuickJoinButton from "@/components/QuickJoinButton";
 import ScoreFraction from "@/components/ScoreFraction";
 import Icon from "@/components/brand/Icon";
@@ -82,6 +83,9 @@ export default async function StudentPortalPage({
     }))
   );
 
+  const badges = computeStudentBadges(finishedExams, student.attendanceRecords);
+  const earnedBadges = badges.filter((b) => b.earned);
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
       <div className="flex items-center justify-between gap-3">
@@ -115,6 +119,37 @@ export default async function StudentPortalPage({
           </div>
         </div>
       )}
+
+      <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-slate-800">
+        <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+          <Icon name="star" size={17} className="text-amber-500" />
+          إنجازاتك ({earnedBadges.length} من {badges.length})
+        </h2>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {badges.map((b) => (
+            <div
+              key={b.key}
+              title={b.description}
+              className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center ${
+                b.earned
+                  ? "bg-amber-50 dark:bg-amber-900/20"
+                  : "bg-slate-50 opacity-50 dark:bg-slate-700/40"
+              }`}
+            >
+              <span
+                className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                  b.earned
+                    ? "bg-amber-400 text-white"
+                    : "bg-slate-200 text-slate-400 dark:bg-slate-600 dark:text-slate-500"
+                }`}
+              >
+                <Icon name={b.icon} size={18} />
+              </span>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{b.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {availableExams.length > 0 && (
         <div className="rounded-2xl bg-brand-panel p-5 dark:bg-slate-800">
